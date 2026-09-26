@@ -39,6 +39,8 @@ services:
     command: ["--config", "/app/litellm/config.yaml", "--port", "4000"]
     env_file:
       - .env                        # cloud keys (VISION_MODEL cloud path), if set
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-sk-master-key-loanassist}
     depends_on:
       - model
     healthcheck:
@@ -64,12 +66,14 @@ services:
       - chroma_cache:/home/appuser/.cache/chroma  # ~80 MB ONNX embed model, once
       - ./prompts:/app/prompts:ro
       - ./api/app.py:/app/app.py:ro
+      - ./api/profile_extractor.py:/app/profile_extractor.py:ro
+      - ./api/rules_engine.py:/app/rules_engine.py:ro
       - ./logs:/app/logs
     env_file:
       - .env
     environment:
       LLM_BASE_URL: http://litellm:4000/v1   # v2 wiring: everything via the proxy
-      LLM_API_KEY: ${LITELLM_MASTER_KEY:-local}
+      LLM_API_KEY: ${LITELLM_MASTER_KEY:-sk-master-key-loanassist}
       LLM_MODEL: ${LLM_MODEL:-openrouter-mini}
       # Vision intake uses OpenRouter by default (set OPENROUTER_API_KEY in .env).
       LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}

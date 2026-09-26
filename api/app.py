@@ -509,7 +509,6 @@ async def _chat_producer(
         if is_document_request(message) and profile.loan_type:
             doc_text = get_doc_checklist(profile.loan_type)
             if doc_text:
-                # Include checklist in the conversation agent response
                 doc_system = (
                     "You are LoanAssist. The user is asking about required documents. "
                     "Include the following document checklist in your response, formatted clearly.\n\n"
@@ -523,16 +522,39 @@ async def _chat_producer(
                 _save_msg(session_id, "assistant", full_answer)
                 return
 
+        # ── User asking directly for eligibility assessment ───────────────────
+        user_wants_decision = any(kw in message.lower() for kw in [
+            "eligible", "eligibility", "can i get", "qualify", "status",
+            "assessment", "approve", "completed assessment"
+        ])
+
         # ── Branch: incomplete profile → ask for missing fields ───────────────
         if missing:
             profile_summary = "\n".join(
                 f"  {k}: {v}" for k, v in profile.to_dict().items()
             ) or "  (nothing collected yet)"
 
-            system_text = CONV_PROMPT["text"].format(
-                profile_summary=profile_summary,
-                missing_fields=describe_missing(missing),
-            )
+            if user_wants_decision:
+                tenure_prompt_hint = ""
+                if "requested_tenure_months" in missing:
+                    tenure_prompt_hint = (
+                        " Loan tenure is mandatory for calculating your EMI and FOIR — please ask for "
+                        "their preferred tenure in months (e.g. 12 to 60 months for personal/auto loan, "
+                        "or up to 360 months for home loan)."
+                    )
+                system_text = (
+                    "You are LoanAssist. The applicant is asking for their loan eligibility, but some "
+                    f"critical information is still missing:\n{describe_missing(missing)}\n\n"
+                    f"{tenure_prompt_hint}\n"
+                    "Do NOT say 'wait for complete assessment' or 'I cannot provide details'. "
+                    "Directly and warmly ask the applicant for the missing information now so you can calculate their eligibility."
+                )
+            else:
+                system_text = CONV_PROMPT["text"].format(
+                    profile_summary=profile_summary,
+                    missing_fields=describe_missing(missing),
+                )
+
             messages = [
                 {"role": "system", "content": system_text},
                 *history,

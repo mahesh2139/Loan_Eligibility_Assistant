@@ -53,7 +53,7 @@ User (Browser :8501)
 | Service | URL | Purpose |
 |:---|:---|:---|
 | **API** | `http://localhost:8001` | FastAPI: `/chat`, `/ask`, `/audit/{id}`, `/scenario`, `/health`, `/metrics`, `/versions` |
-| **LiteLLM** | `http://localhost:4000` | OpenAI-compatible proxy with local model & cloud failover |
+| **LiteLLM Admin UI & Proxy** | `http://localhost:4000/ui` (Proxy: `http://localhost:4000`) | OpenAI-compatible proxy & dashboard (Master Key: `sk-master-key-loanassist`) |
 | **Local model** | `http://localhost:8090` | Qwen 2.5-1.5B local inference server |
 | **Prometheus** | `http://localhost:9090` | Metrics scraping target |
 | **Grafana** | `http://localhost:3000` | Golden signals dashboard (`admin` / `admin`) |

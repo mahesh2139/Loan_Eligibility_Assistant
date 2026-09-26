@@ -75,5 +75,5 @@ router_settings:
 # per team or per key, and /spend/logs reports cost per request.
 
 general_settings:
-  # Uncomment to require Authorization: Bearer $LITELLM_MASTER_KEY on every call
-  # master_key: os.environ/LITELLM_MASTER_KEY
+  # Requires Authorization: Bearer $LITELLM_MASTER_KEY and enables LiteLLM Admin UI login
+  master_key: os.environ/LITELLM_MASTER_KEY

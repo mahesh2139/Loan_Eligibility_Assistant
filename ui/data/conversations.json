@@ -1900,5 +1900,1844 @@
     ],
     "last_app_id": "APP-2477E11C7043",
     "product": "personal_loan"
+  },
+  "conv-4f6765be": {
+    "session_id": "conv-4f6765be",
+    "title": "I want to check eligibility for…",
+    "created_at": 1790420202.1939287,
+    "updated_at": 1790420621.5148537,
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to check eligibility for house loan"
+      },
+      {
+        "role": "assistant",
+        "content": "Great! I can help you with that. To get started, could you please share your age and your employment type (salaried, self-employed, or business owner)?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "age 23"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for confirming your age! Now, could you please let me know your employment type (salaried, self-employed, or business owner) and your monthly net income (take-home pay after deductions)?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "self-employed and monthly net income is 800000"
+      },
+      {
+        "role": "assistant",
+        "content": "Thanks for sharing that! Now, could you please tell me how long you have been self-employed or in business? Also, what is your credit or CIBIL score?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "2 years and cibil is 780"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for the information! Now, could you please let me know the total of all your existing monthly EMI obligations? If you have none, just enter 0. Also, what loan amount are you requesting for your home loan?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "yes, 10000 and want to take loan for 2500000"
+      },
+      {
+        "role": "assistant",
+        "content": "Thanks for that! Now, could you please share your preferred loan tenure in months and the market value of the property you’re looking to purchase?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "loan tenure 15 years and property value is 5000000"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for the details! Now, could you please let me know the down payment amount you plan to make for the property? Additionally, what type of property is it (apartment, villa, or residential house)?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "down payment is 2500000 and its villa"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility status for the home loan is currently marked as MANUAL_REVIEW. This means that while you meet most of the necessary criteria, there is a specific aspect that requires further examination before a final decision can be made.\n\nThe assessment shows that you passed several key eligibility rules: your age of 23 is within the acceptable range, your monthly income of ₹80,000 exceeds the minimum requirement of ₹40,000, and your credit score of 780 is well above the minimum threshold of 700. Additionally, your Fixed Obligation to Income Ratio (FOIR) of 43.3% and Loan-to-Value (LTV) ratio of 50.0% are both within acceptable limits. Your requested loan amount of ₹2,500,000 is also compliant with policy limits, and the property type, a villa, is eligible for financing.\n\nHowever, the rule regarding Employment Stability (Rule ID: HL-EMP-001) has raised a flag. Your business has been operational for 24 months, which is at the lower end of the required range of 24–36 months. As a result, additional income documentation is needed for a manual review to assess your employment stability more thoroughly.\n\nTo proceed, you will need to provide the required documentation that demonstrates your income stability. This may include additional financial statements or other relevant documents. Please note that this manual review does not guarantee final loan approval, but it is a necessary step in the evaluation process.",
+        "meta": {
+          "decision": {
+            "decision": "MANUAL_REVIEW",
+            "product": "home_loan",
+            "rule_checks": [
+              {
+                "rule_id": "HL-AGE-001",
+                "rule_name": "Age Eligibility",
+                "result": "PASS",
+                "detail": "Age 23 is eligible and loan closes within age limit of 70.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹80,000 meets minimum ₹40,000.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "MANUAL_REVIEW",
+                "detail": "Business 24 months is between 24–36 months — additional income documentation required for manual review.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 780 meets minimum 700.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "PASS",
+                "detail": "FOIR 43.3% ≤ maximum 55%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "PASS",
+                "detail": "LTV 50.0% ≤ maximum 85%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-PROP-001",
+                "rule_name": "Property Eligibility",
+                "result": "PASS",
+                "detail": "Property type 'villa' is eligible for a home loan.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount ₹2,500,000 is within policy limits.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 180 months is within 12–360 months.",
+                "rule_version": "v1"
+              }
+            ],
+            "failed_rules": [],
+            "manual_review_rules": [
+              {
+                "rule_id": "HL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "MANUAL_REVIEW",
+                "detail": "Business 24 months is between 24–36 months — additional income documentation required for manual review."
+              }
+            ],
+            "missing_fields": [],
+            "policy_version": "v1"
+          },
+          "calcs": {
+            "emi": 24618.49,
+            "foir": 0.4327,
+            "ltv": 0.5,
+            "max_affordable_loan": 3452689.57,
+            "total_interest": 1931328.2,
+            "total_payment": 4431328.2
+          },
+          "annual_rate": 8.5,
+          "citations": [
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-LTV-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** HL-LTV-001 The Loan-to-Value ratio determines the maximum loan as a percentage of the property's assessed market value: - For loan amounts up to ₹30,00,000 (thirty lakh rupees): maximum LTV of 85% - For loan amounts above ₹30,00,000 (thirty lakh rupees): "
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-AMT-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 8. Loan Amount **Rule ID:** HL-AMT-001 The minimum home loan amount is ₹5,00,000 (five lakh rupees). The maximum home loan amount is ₹5,00,00,000 (five crore rupees). The loan amount is further capped by: - The applicable LTV ratio applied to the property's assessed value - The maximum affordable"
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-PROP-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 7. Property Eligibility **Rule ID:** HL-PROP-001 Financing is available only for the following property types: - Apartment (flat in a residential complex) - Villa (standalone residential property with defined plot) - Residential house (independent house on a defined plot) The following property t"
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-DOC-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 10. Documentation Requirements **Rule ID:** HL-DOC-001 The following documents are required for a home loan application: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Income proof: - Salaried: last 3 months "
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-FOIR-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 5. Fixed Obligation to Income Ratio (FOIR) **Rule ID:** HL-FOIR-001 The Fixed Obligation to Income Ratio (FOIR) — calculated as all monthly loan EMIs (including the proposed home loan EMI) divided by monthly net income — must not exceed 55%. FOIR = (Existing Monthly EMIs + Proposed Home Loan EMI)"
+            }
+          ],
+          "app_id": "APP-09173AEA57CF",
+          "rule_checks": [
+            {
+              "rule_id": "HL-AGE-001",
+              "rule_name": "Age Eligibility",
+              "result": "PASS",
+              "detail": "Age 23 is eligible and loan closes within age limit of 70.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹80,000 meets minimum ₹40,000.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-EMP-001",
+              "rule_name": "Employment Stability",
+              "result": "MANUAL_REVIEW",
+              "detail": "Business 24 months is between 24–36 months — additional income documentation required for manual review.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 780 meets minimum 700.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "PASS",
+              "detail": "FOIR 43.3% ≤ maximum 55%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-LTV-001",
+              "rule_name": "Loan-to-Value (LTV)",
+              "result": "PASS",
+              "detail": "LTV 50.0% ≤ maximum 85%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-PROP-001",
+              "rule_name": "Property Eligibility",
+              "result": "PASS",
+              "detail": "Property type 'villa' is eligible for a home loan.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount ₹2,500,000 is within policy limits.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 180 months is within 12–360 months.",
+              "rule_version": "v1"
+            }
+          ]
+        }
+      },
+      {
+        "role": "user",
+        "content": "if instead of 250000 i want to take 4000000 with 1000000 down payment - check eligibility "
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for a home loan has resulted in a decision of NOT_ELIGIBLE. This means that, based on the current evaluation, you do not meet the necessary criteria to qualify for the loan at this time.\n\nSeveral rules were evaluated during the assessment. You successfully met the following criteria: your age (23) is within the eligible range, your monthly income of ₹80,000 exceeds the minimum requirement of ₹40,000, your credit score of 780 is above the minimum of 700, your loan-to-value (LTV) ratio of 80.0% is acceptable, and your loan tenure of 180 months is within the allowed range. However, you did not meet the following critical criteria: your Fixed Obligation to Income Ratio (FOIR) is 61.7%, which exceeds the maximum allowable limit of 55% (Rule ID: HL-FOIR-001), and the loan amount of ₹4,000,000 exceeds the maximum affordable amount of ₹3,452,690 based on your income and FOIR (Rule ID: HL-AMT-001).\n\nTo improve your eligibility, you could consider reducing your existing debt obligations to lower your FOIR below the 55% threshold. Additionally, you may want to request a lower loan amount that aligns with your maximum affordable limit. \n\nPlease note that this assessment does not guarantee final loan approval, and any changes to your financial situation or loan request would need to be re-evaluated.",
+        "meta": {
+          "decision": {
+            "decision": "NOT_ELIGIBLE",
+            "product": "home_loan",
+            "rule_checks": [
+              {
+                "rule_id": "HL-AGE-001",
+                "rule_name": "Age Eligibility",
+                "result": "PASS",
+                "detail": "Age 23 is eligible and loan closes within age limit of 70.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹80,000 meets minimum ₹40,000.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "MANUAL_REVIEW",
+                "detail": "Business 24 months is between 24–36 months — additional income documentation required for manual review.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 780 meets minimum 700.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 61.7% > maximum 55%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "PASS",
+                "detail": "LTV 80.0% ≤ maximum 80%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-PROP-001",
+                "rule_name": "Property Eligibility",
+                "result": "PASS",
+                "detail": "Property type 'villa' is eligible for a home loan.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "FAIL",
+                "detail": "Amount ₹4,000,000 exceeds maximum affordable ₹3,452,690 based on income and FOIR.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 180 months is within 12–360 months.",
+                "rule_version": "v1"
+              }
+            ],
+            "failed_rules": [
+              {
+                "rule_id": "HL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 61.7% > maximum 55%."
+              },
+              {
+                "rule_id": "HL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "FAIL",
+                "detail": "Amount ₹4,000,000 exceeds maximum affordable ₹3,452,690 based on income and FOIR."
+              }
+            ],
+            "manual_review_rules": [
+              {
+                "rule_id": "HL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "MANUAL_REVIEW",
+                "detail": "Business 24 months is between 24–36 months — additional income documentation required for manual review."
+              }
+            ],
+            "missing_fields": [],
+            "policy_version": "v1"
+          },
+          "calcs": {
+            "emi": 39389.58,
+            "foir": 0.6174,
+            "ltv": 0.8,
+            "max_affordable_loan": 3452689.57,
+            "total_interest": 3090124.4,
+            "total_payment": 7090124.4
+          },
+          "annual_rate": 8.5,
+          "citations": [
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-LTV-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** HL-LTV-001 The Loan-to-Value ratio determines the maximum loan as a percentage of the property's assessed market value: - For loan amounts up to ₹30,00,000 (thirty lakh rupees): maximum LTV of 85% - For loan amounts above ₹30,00,000 (thirty lakh rupees): "
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-AMT-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 8. Loan Amount **Rule ID:** HL-AMT-001 The minimum home loan amount is ₹5,00,000 (five lakh rupees). The maximum home loan amount is ₹5,00,00,000 (five crore rupees). The loan amount is further capped by: - The applicable LTV ratio applied to the property's assessed value - The maximum affordable"
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-INC-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 2. Minimum Income **Rule ID:** HL-INC-001 Applicants must have a minimum monthly net income of ₹40,000 (forty thousand rupees) after all statutory deductions. For joint applicants, the combined monthly net income is considered. Income below the stated threshold does not meet the minimum requireme"
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-FOIR-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 5. Fixed Obligation to Income Ratio (FOIR) **Rule ID:** HL-FOIR-001 The Fixed Obligation to Income Ratio (FOIR) — calculated as all monthly loan EMIs (including the proposed home loan EMI) divided by monthly net income — must not exceed 55%. FOIR = (Existing Monthly EMIs + Proposed Home Loan EMI)"
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-DOC-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 10. Documentation Requirements **Rule ID:** HL-DOC-001 The following documents are required for a home loan application: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Income proof: - Salaried: last 3 months "
+            }
+          ],
+          "app_id": "APP-BF951605C8B8",
+          "rule_checks": [
+            {
+              "rule_id": "HL-AGE-001",
+              "rule_name": "Age Eligibility",
+              "result": "PASS",
+              "detail": "Age 23 is eligible and loan closes within age limit of 70.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹80,000 meets minimum ₹40,000.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-EMP-001",
+              "rule_name": "Employment Stability",
+              "result": "MANUAL_REVIEW",
+              "detail": "Business 24 months is between 24–36 months — additional income documentation required for manual review.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 780 meets minimum 700.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "FAIL",
+              "detail": "FOIR 61.7% > maximum 55%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-LTV-001",
+              "rule_name": "Loan-to-Value (LTV)",
+              "result": "PASS",
+              "detail": "LTV 80.0% ≤ maximum 80%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-PROP-001",
+              "rule_name": "Property Eligibility",
+              "result": "PASS",
+              "detail": "Property type 'villa' is eligible for a home loan.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "FAIL",
+              "detail": "Amount ₹4,000,000 exceeds maximum affordable ₹3,452,690 based on income and FOIR.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 180 months is within 12–360 months.",
+              "rule_version": "v1"
+            }
+          ]
+        }
+      }
+    ],
+    "last_decision": {
+      "decision": "NOT_ELIGIBLE",
+      "product": "home_loan",
+      "rule_checks": [
+        {
+          "rule_id": "HL-AGE-001",
+          "rule_name": "Age Eligibility",
+          "result": "PASS",
+          "detail": "Age 23 is eligible and loan closes within age limit of 70.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-INC-001",
+          "rule_name": "Minimum Income",
+          "result": "PASS",
+          "detail": "Monthly income ₹80,000 meets minimum ₹40,000.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-EMP-001",
+          "rule_name": "Employment Stability",
+          "result": "MANUAL_REVIEW",
+          "detail": "Business 24 months is between 24–36 months — additional income documentation required for manual review.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-CRD-001",
+          "rule_name": "Credit Score",
+          "result": "PASS",
+          "detail": "Credit score 780 meets minimum 700.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "FAIL",
+          "detail": "FOIR 61.7% > maximum 55%.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-LTV-001",
+          "rule_name": "Loan-to-Value (LTV)",
+          "result": "PASS",
+          "detail": "LTV 80.0% ≤ maximum 80%.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-PROP-001",
+          "rule_name": "Property Eligibility",
+          "result": "PASS",
+          "detail": "Property type 'villa' is eligible for a home loan.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-AMT-001",
+          "rule_name": "Loan Amount",
+          "result": "FAIL",
+          "detail": "Amount ₹4,000,000 exceeds maximum affordable ₹3,452,690 based on income and FOIR.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-TEN-001",
+          "rule_name": "Loan Tenure",
+          "result": "PASS",
+          "detail": "Tenure 180 months is within 12–360 months.",
+          "rule_version": "v1"
+        }
+      ],
+      "failed_rules": [
+        {
+          "rule_id": "HL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "FAIL",
+          "detail": "FOIR 61.7% > maximum 55%."
+        },
+        {
+          "rule_id": "HL-AMT-001",
+          "rule_name": "Loan Amount",
+          "result": "FAIL",
+          "detail": "Amount ₹4,000,000 exceeds maximum affordable ₹3,452,690 based on income and FOIR."
+        }
+      ],
+      "manual_review_rules": [
+        {
+          "rule_id": "HL-EMP-001",
+          "rule_name": "Employment Stability",
+          "result": "MANUAL_REVIEW",
+          "detail": "Business 24 months is between 24–36 months — additional income documentation required for manual review."
+        }
+      ],
+      "missing_fields": [],
+      "policy_version": "v1"
+    },
+    "last_calcs": {
+      "emi": 39389.58,
+      "foir": 0.6174,
+      "ltv": 0.8,
+      "max_affordable_loan": 3452689.57,
+      "total_interest": 3090124.4,
+      "total_payment": 7090124.4
+    },
+    "last_citations": [
+      {
+        "doc": "home_loan_v1.md",
+        "rule_id": "HL-LTV-001",
+        "version": "v1",
+        "policy_id": "LPQ-HL-2026-01",
+        "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** HL-LTV-001 The Loan-to-Value ratio determines the maximum loan as a percentage of the property's assessed market value: - For loan amounts up to ₹30,00,000 (thirty lakh rupees): maximum LTV of 85% - For loan amounts above ₹30,00,000 (thirty lakh rupees): "
+      },
+      {
+        "doc": "home_loan_v1.md",
+        "rule_id": "HL-AMT-001",
+        "version": "v1",
+        "policy_id": "LPQ-HL-2026-01",
+        "text": "## 8. Loan Amount **Rule ID:** HL-AMT-001 The minimum home loan amount is ₹5,00,000 (five lakh rupees). The maximum home loan amount is ₹5,00,00,000 (five crore rupees). The loan amount is further capped by: - The applicable LTV ratio applied to the property's assessed value - The maximum affordable"
+      },
+      {
+        "doc": "home_loan_v1.md",
+        "rule_id": "HL-INC-001",
+        "version": "v1",
+        "policy_id": "LPQ-HL-2026-01",
+        "text": "## 2. Minimum Income **Rule ID:** HL-INC-001 Applicants must have a minimum monthly net income of ₹40,000 (forty thousand rupees) after all statutory deductions. For joint applicants, the combined monthly net income is considered. Income below the stated threshold does not meet the minimum requireme"
+      },
+      {
+        "doc": "home_loan_v1.md",
+        "rule_id": "HL-FOIR-001",
+        "version": "v1",
+        "policy_id": "LPQ-HL-2026-01",
+        "text": "## 5. Fixed Obligation to Income Ratio (FOIR) **Rule ID:** HL-FOIR-001 The Fixed Obligation to Income Ratio (FOIR) — calculated as all monthly loan EMIs (including the proposed home loan EMI) divided by monthly net income — must not exceed 55%. FOIR = (Existing Monthly EMIs + Proposed Home Loan EMI)"
+      },
+      {
+        "doc": "home_loan_v1.md",
+        "rule_id": "HL-DOC-001",
+        "version": "v1",
+        "policy_id": "LPQ-HL-2026-01",
+        "text": "## 10. Documentation Requirements **Rule ID:** HL-DOC-001 The following documents are required for a home loan application: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Income proof: - Salaried: last 3 months "
+      }
+    ],
+    "last_app_id": "APP-BF951605C8B8",
+    "product": "home_loan"
+  },
+  "conv-113b5464": {
+    "session_id": "conv-113b5464",
+    "title": "I want to take a vehicle - can i…",
+    "created_at": 1790420664.3157148,
+    "updated_at": 1790421071.3028984,
+    "messages": [
+      {
+        "role": "user",
+        "content": "i want to take a vehicle - can i get loan for it ?"
+      },
+      {
+        "role": "assistant",
+        "content": "I'd be happy to help you with an auto loan! To get started, could you please share the on-road price of the vehicle you're interested in? Also, let me know if it's a new or used vehicle.",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "500000 and it used"
+      },
+      {
+        "role": "assistant",
+        "content": "Thanks for confirming the on-road price! To proceed, could you please tell me your age and your employment type (salaried, self-employed, or business owner)?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "age is 34 and business owner"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for that information! Now, could you please share your monthly take-home pay after tax and deductions? Also, how long have you been in business?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "montthly take home is 25000 and i am in business from last 2 years"
+      },
+      {
+        "role": "assistant",
+        "content": "Great, thanks for sharing! Now, could you please provide your credit or CIBIL score? Additionally, let me know your preferred loan tenure in months.",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "660"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for that! Lastly, could you let me know your total existing monthly EMI obligations? If you don't have any, just enter 0.",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "15000"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for providing all the information! I have everything I need to assess your loan eligibility. If you have any questions or need further assistance, feel free to ask!",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "tell me my eligibility "
+      },
+      {
+        "role": "assistant",
+        "content": "I appreciate your patience! However, I can't provide eligibility details without going through the necessary assessment process. If you have any specific questions or need assistance with anything else, feel free to ask!",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "tell me if i am eligible for load for purchase car"
+      },
+      {
+        "role": "assistant",
+        "content": "I understand you're eager to know about your eligibility for the auto loan. However, I need to complete the assessment process to provide accurate information. If you have any other questions or need assistance with the next steps, I'm here to help!",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "have you completed assessment ? "
+      },
+      {
+        "role": "assistant",
+        "content": "I appreciate your interest! However, I can't provide eligibility details until the assessment process is fully completed. If you have any specific questions or need assistance with anything else, please let me know!",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "i wanted to check eligibility for a bus loan"
+      },
+      {
+        "role": "assistant",
+        "content": "It seems you're interested in a loan for a bus. To assist you better, could you please provide the on-road price of the bus you're looking to purchase? Additionally, let me know if it's new or used.",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "200000 and its new"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for that information! Now, could you please share your preferred loan tenure in months for the bus loan?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "loan tenure is 2 years"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for the auto loan has resulted in a decision of NOT_ELIGIBLE. This means that, based on the current information provided, you do not meet the necessary criteria to qualify for the loan at this time.\n\nSeveral rules were evaluated in your application. The following criteria passed: your age (34) is within the allowed range (Rule ID: AL-AGE-001), your monthly income of ₹25,000 meets the minimum requirement of ₹20,000 (Rule ID: AL-INC-001), and your employment stability is confirmed with 24 months in business (Rule ID: AL-EMP-001). However, your application failed on three critical points: your credit score of 660 is below the minimum required score of 680 (Rule ID: AL-CRD-001), your FOIR (Fixed Obligation to Income Ratio) of 96.5% exceeds the maximum limit of 50% (Rule ID: AL-FOIR-001), and your Loan-to-Value (LTV) ratio of 100% is above the maximum allowable limit of 85% for new vehicles (Rule ID: AL-LTV-001).\n\nTo improve your eligibility, you would need to address the following specific issues: increase your credit score to at least 680, reduce your FOIR to below 50%, and ensure that your LTV ratio is within the maximum limit of 85%. This may involve improving your credit history, reducing existing debts, or increasing your down payment for the vehicle.\n\nPlease note that these changes are necessary for you to be considered eligible for the auto loan. If you have any further questions or need assistance in making these adjustments, feel free to reach out.",
+        "meta": {
+          "decision": {
+            "decision": "NOT_ELIGIBLE",
+            "product": "auto_loan",
+            "rule_checks": [
+              {
+                "rule_id": "AL-AGE-001",
+                "rule_name": "Age Eligibility",
+                "result": "PASS",
+                "detail": "Age 34 is within allowed range 21-65.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income Rs.25,000 meets minimum Rs.20,000.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "PASS",
+                "detail": "Business 24m meets 24m requirement.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "FAIL",
+                "detail": "Credit score 660 < minimum 680.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 96.5% > maximum 50%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "FAIL",
+                "detail": "LTV 100.0% > maximum 85% for new vehicle.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-VEH-001",
+                "rule_name": "Vehicle Eligibility",
+                "result": "PASS",
+                "detail": "Vehicle is eligible (new).",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount Rs.200,000 is within policy limits.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 24m within 12-48m.",
+                "rule_version": "v1"
+              }
+            ],
+            "failed_rules": [
+              {
+                "rule_id": "AL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "FAIL",
+                "detail": "Credit score 660 < minimum 680."
+              },
+              {
+                "rule_id": "AL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 96.5% > maximum 50%."
+              },
+              {
+                "rule_id": "AL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "FAIL",
+                "detail": "LTV 100.0% > maximum 85% for new vehicle."
+              }
+            ],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v1"
+          },
+          "calcs": {
+            "emi": 9136.95,
+            "foir": 0.9655,
+            "ltv": 1.0,
+            "max_affordable_loan": 0.0,
+            "total_interest": 19286.8,
+            "total_payment": 219286.8
+          },
+          "annual_rate": 9.0,
+          "citations": [
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-TEN-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 9. Loan Tenure **Rule ID:** AL-TEN-001 Auto loan tenure must be between 12 months (1 year) and 84 months (7 years) for new vehicles. For used vehicles, the maximum tenure is 60 months (5 years). For commercial vehicles, the maximum tenure is 48 months (4 years). The total tenure must not cause th"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-DOC-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 10. Documentation Requirements **Rule ID:** AL-DOC-001 The following documents are required for an auto loan application: For all applicants: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Last 6 months bank "
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-AMT-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 8. Loan Amount **Rule ID:** AL-AMT-001 The minimum auto loan amount is Rs.50,000 (fifty thousand rupees). The maximum auto loan amount is Rs.50,00,000 (fifty lakh rupees). The loan amount is further limited by: - The applicable LTV ratio applied to the on-road vehicle price - The maximum affordab"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-LTV-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** AL-LTV-001 The Loan-to-Value ratio is calculated on the on-road price of the vehicle (ex-showroom price plus registration, insurance, and taxes). For new vehicles: maximum LTV of 85% of on-road price. For used/pre-owned vehicles: maximum LTV of 70% of on-"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-EXC-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 11. Exceptions and Manual Review Cases **Rule ID:** AL-EXC-001 The following cases are subject to manual underwriting review: - Used electric vehicles (EVs) financed for the first time - Commercial vehicle loans above Rs.20 lakh for new borrowers - Applicants with credit scores between 660 and 67"
+            }
+          ],
+          "app_id": "APP-5E2CBAEBCF59",
+          "rule_checks": [
+            {
+              "rule_id": "AL-AGE-001",
+              "rule_name": "Age Eligibility",
+              "result": "PASS",
+              "detail": "Age 34 is within allowed range 21-65.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income Rs.25,000 meets minimum Rs.20,000.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-EMP-001",
+              "rule_name": "Employment Stability",
+              "result": "PASS",
+              "detail": "Business 24m meets 24m requirement.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "FAIL",
+              "detail": "Credit score 660 < minimum 680.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "FAIL",
+              "detail": "FOIR 96.5% > maximum 50%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-LTV-001",
+              "rule_name": "Loan-to-Value (LTV)",
+              "result": "FAIL",
+              "detail": "LTV 100.0% > maximum 85% for new vehicle.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-VEH-001",
+              "rule_name": "Vehicle Eligibility",
+              "result": "PASS",
+              "detail": "Vehicle is eligible (new).",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount Rs.200,000 is within policy limits.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 24m within 12-48m.",
+              "rule_version": "v1"
+            }
+          ]
+        }
+      }
+    ],
+    "last_decision": {
+      "decision": "NOT_ELIGIBLE",
+      "product": "auto_loan",
+      "rule_checks": [
+        {
+          "rule_id": "AL-AGE-001",
+          "rule_name": "Age Eligibility",
+          "result": "PASS",
+          "detail": "Age 34 is within allowed range 21-65.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-INC-001",
+          "rule_name": "Minimum Income",
+          "result": "PASS",
+          "detail": "Monthly income Rs.25,000 meets minimum Rs.20,000.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-EMP-001",
+          "rule_name": "Employment Stability",
+          "result": "PASS",
+          "detail": "Business 24m meets 24m requirement.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-CRD-001",
+          "rule_name": "Credit Score",
+          "result": "FAIL",
+          "detail": "Credit score 660 < minimum 680.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "FAIL",
+          "detail": "FOIR 96.5% > maximum 50%.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-LTV-001",
+          "rule_name": "Loan-to-Value (LTV)",
+          "result": "FAIL",
+          "detail": "LTV 100.0% > maximum 85% for new vehicle.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-VEH-001",
+          "rule_name": "Vehicle Eligibility",
+          "result": "PASS",
+          "detail": "Vehicle is eligible (new).",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-AMT-001",
+          "rule_name": "Loan Amount",
+          "result": "PASS",
+          "detail": "Amount Rs.200,000 is within policy limits.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-TEN-001",
+          "rule_name": "Loan Tenure",
+          "result": "PASS",
+          "detail": "Tenure 24m within 12-48m.",
+          "rule_version": "v1"
+        }
+      ],
+      "failed_rules": [
+        {
+          "rule_id": "AL-CRD-001",
+          "rule_name": "Credit Score",
+          "result": "FAIL",
+          "detail": "Credit score 660 < minimum 680."
+        },
+        {
+          "rule_id": "AL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "FAIL",
+          "detail": "FOIR 96.5% > maximum 50%."
+        },
+        {
+          "rule_id": "AL-LTV-001",
+          "rule_name": "Loan-to-Value (LTV)",
+          "result": "FAIL",
+          "detail": "LTV 100.0% > maximum 85% for new vehicle."
+        }
+      ],
+      "manual_review_rules": [],
+      "missing_fields": [],
+      "policy_version": "v1"
+    },
+    "last_calcs": {
+      "emi": 9136.95,
+      "foir": 0.9655,
+      "ltv": 1.0,
+      "max_affordable_loan": 0.0,
+      "total_interest": 19286.8,
+      "total_payment": 219286.8
+    },
+    "last_citations": [
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-TEN-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 9. Loan Tenure **Rule ID:** AL-TEN-001 Auto loan tenure must be between 12 months (1 year) and 84 months (7 years) for new vehicles. For used vehicles, the maximum tenure is 60 months (5 years). For commercial vehicles, the maximum tenure is 48 months (4 years). The total tenure must not cause th"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-DOC-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 10. Documentation Requirements **Rule ID:** AL-DOC-001 The following documents are required for an auto loan application: For all applicants: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Last 6 months bank "
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-AMT-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 8. Loan Amount **Rule ID:** AL-AMT-001 The minimum auto loan amount is Rs.50,000 (fifty thousand rupees). The maximum auto loan amount is Rs.50,00,000 (fifty lakh rupees). The loan amount is further limited by: - The applicable LTV ratio applied to the on-road vehicle price - The maximum affordab"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-LTV-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** AL-LTV-001 The Loan-to-Value ratio is calculated on the on-road price of the vehicle (ex-showroom price plus registration, insurance, and taxes). For new vehicles: maximum LTV of 85% of on-road price. For used/pre-owned vehicles: maximum LTV of 70% of on-"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-EXC-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 11. Exceptions and Manual Review Cases **Rule ID:** AL-EXC-001 The following cases are subject to manual underwriting review: - Used electric vehicles (EVs) financed for the first time - Commercial vehicle loans above Rs.20 lakh for new borrowers - Applicants with credit scores between 660 and 67"
+      }
+    ],
+    "last_app_id": "APP-5E2CBAEBCF59",
+    "product": "auto_loan"
+  },
+  "conv-e4e46ba4": {
+    "session_id": "conv-e4e46ba4",
+    "title": "I want to purchase a car and…",
+    "created_at": 1790423506.0787442,
+    "updated_at": 1790423607.3118985,
+    "messages": [
+      {
+        "role": "user",
+        "content": "i want to purchase a car and checking for loan "
+      },
+      {
+        "role": "assistant",
+        "content": "That sounds exciting! To help you with your auto loan, could you please share the total on-road price of the car you're looking to buy? Also, what is your preferred loan tenure in months or years?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "on-road price is 900000 and loan tenure is 30 months"
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for confirming that! To proceed, could you please share your age and your employment type (salaried, self-employed, or business owner)?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "age is 30 and self-employed"
+      },
+      {
+        "role": "assistant",
+        "content": "Thanks for that information! To evaluate your eligibility, please share your monthly take-home pay after tax and deductions, as well as how long you have been self-employed.",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "monthly take-home is 25000 and 1.5 years"
+      },
+      {
+        "role": "assistant",
+        "content": "Great, thank you! Just a couple more things: could you please provide your credit or CIBIL score? Also, let me know your total existing monthly EMI obligations (enter 0 if none).",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "700"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for the auto loan has resulted in a decision of NOT_ELIGIBLE. This means that, based on the current information and criteria, you do not meet the necessary requirements to qualify for the loan at this time.\n\nIn your assessment, several rules were evaluated. You passed the following criteria: your age (30) is within the allowed range (Rule ID: AL-AGE-001), your monthly income of ₹25,000 meets the minimum requirement of ₹20,000 (Rule ID: AL-INC-001), your credit score of 700 exceeds the minimum of 680 (Rule ID: AL-CRD-001), the vehicle is eligible as it is new (Rule ID: AL-VEH-001), the loan amount of ₹900,000 is within policy limits (Rule ID: AL-AMT-001), and the loan tenure of 30 months is acceptable (Rule ID: AL-TEN-001). However, you did not meet the following criteria: your employment stability shows only 18 months in business, which is less than the required 24 months (Rule ID: AL-EMP-001), your FOIR is 134.4%, exceeding the maximum limit of 50% (Rule ID: AL-FOIR-001), and your Loan-to-Value (LTV) ratio is 100%, which is above the maximum allowed of 85% for new vehicles (Rule ID: AL-LTV-001).\n\nTo improve your eligibility, you could consider increasing your employment stability to meet the 24-month requirement. Additionally, reducing your FOIR to within the acceptable limit and ensuring your LTV ratio is below 85% would also be necessary. This may involve providing a larger down payment for the vehicle.\n\nPlease note that this assessment does not guarantee final loan approval, and any changes made will need to be re-evaluated against the eligibility criteria.",
+        "meta": {
+          "decision": {
+            "decision": "NOT_ELIGIBLE",
+            "product": "auto_loan",
+            "rule_checks": [
+              {
+                "rule_id": "AL-AGE-001",
+                "rule_name": "Age Eligibility",
+                "result": "PASS",
+                "detail": "Age 30 is within allowed range 21-65.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income Rs.25,000 meets minimum Rs.20,000.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "FAIL",
+                "detail": "Business 18m < required 24m.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 700 meets minimum 680.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 134.4% > maximum 50%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "FAIL",
+                "detail": "LTV 100.0% > maximum 85% for new vehicle.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-VEH-001",
+                "rule_name": "Vehicle Eligibility",
+                "result": "PASS",
+                "detail": "Vehicle is eligible (new).",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount Rs.900,000 is within policy limits.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 30m within 12-84m.",
+                "rule_version": "v1"
+              }
+            ],
+            "failed_rules": [
+              {
+                "rule_id": "AL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "FAIL",
+                "detail": "Business 18m < required 24m."
+              },
+              {
+                "rule_id": "AL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 134.4% > maximum 50%."
+              },
+              {
+                "rule_id": "AL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "FAIL",
+                "detail": "LTV 100.0% > maximum 85% for new vehicle."
+              }
+            ],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v1"
+          },
+          "calcs": {
+            "emi": 33613.34,
+            "foir": 1.3445,
+            "ltv": 1.0,
+            "max_affordable_loan": 334688.5,
+            "total_interest": 108400.2,
+            "total_payment": 1008400.2
+          },
+          "annual_rate": 9.0,
+          "citations": [
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-AMT-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 8. Loan Amount **Rule ID:** AL-AMT-001 The minimum auto loan amount is Rs.50,000 (fifty thousand rupees). The maximum auto loan amount is Rs.50,00,000 (fifty lakh rupees). The loan amount is further limited by: - The applicable LTV ratio applied to the on-road vehicle price - The maximum affordab"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-DOC-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 10. Documentation Requirements **Rule ID:** AL-DOC-001 The following documents are required for an auto loan application: For all applicants: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Last 6 months bank "
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-LTV-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** AL-LTV-001 The Loan-to-Value ratio is calculated on the on-road price of the vehicle (ex-showroom price plus registration, insurance, and taxes). For new vehicles: maximum LTV of 85% of on-road price. For used/pre-owned vehicles: maximum LTV of 70% of on-"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-EXC-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 11. Exceptions and Manual Review Cases **Rule ID:** AL-EXC-001 The following cases are subject to manual underwriting review: - Used electric vehicles (EVs) financed for the first time - Commercial vehicle loans above Rs.20 lakh for new borrowers - Applicants with credit scores between 660 and 67"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-VEH-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 7. Vehicle Eligibility **Rule ID:** AL-VEH-001 The following vehicle types are eligible for financing: - Two-wheelers: motorcycles and scooters (new and used) - Four-wheelers: passenger cars, SUVs, MUVs (new and used) - Commercial vehicles: trucks, buses, vans used for business (new only) - Elect"
+            }
+          ],
+          "app_id": "APP-2783273355BA",
+          "rule_checks": [
+            {
+              "rule_id": "AL-AGE-001",
+              "rule_name": "Age Eligibility",
+              "result": "PASS",
+              "detail": "Age 30 is within allowed range 21-65.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income Rs.25,000 meets minimum Rs.20,000.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-EMP-001",
+              "rule_name": "Employment Stability",
+              "result": "FAIL",
+              "detail": "Business 18m < required 24m.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 700 meets minimum 680.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "FAIL",
+              "detail": "FOIR 134.4% > maximum 50%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-LTV-001",
+              "rule_name": "Loan-to-Value (LTV)",
+              "result": "FAIL",
+              "detail": "LTV 100.0% > maximum 85% for new vehicle.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-VEH-001",
+              "rule_name": "Vehicle Eligibility",
+              "result": "PASS",
+              "detail": "Vehicle is eligible (new).",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount Rs.900,000 is within policy limits.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 30m within 12-84m.",
+              "rule_version": "v1"
+            }
+          ]
+        }
+      }
+    ],
+    "last_decision": {
+      "decision": "NOT_ELIGIBLE",
+      "product": "auto_loan",
+      "rule_checks": [
+        {
+          "rule_id": "AL-AGE-001",
+          "rule_name": "Age Eligibility",
+          "result": "PASS",
+          "detail": "Age 30 is within allowed range 21-65.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-INC-001",
+          "rule_name": "Minimum Income",
+          "result": "PASS",
+          "detail": "Monthly income Rs.25,000 meets minimum Rs.20,000.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-EMP-001",
+          "rule_name": "Employment Stability",
+          "result": "FAIL",
+          "detail": "Business 18m < required 24m.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-CRD-001",
+          "rule_name": "Credit Score",
+          "result": "PASS",
+          "detail": "Credit score 700 meets minimum 680.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "FAIL",
+          "detail": "FOIR 134.4% > maximum 50%.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-LTV-001",
+          "rule_name": "Loan-to-Value (LTV)",
+          "result": "FAIL",
+          "detail": "LTV 100.0% > maximum 85% for new vehicle.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-VEH-001",
+          "rule_name": "Vehicle Eligibility",
+          "result": "PASS",
+          "detail": "Vehicle is eligible (new).",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-AMT-001",
+          "rule_name": "Loan Amount",
+          "result": "PASS",
+          "detail": "Amount Rs.900,000 is within policy limits.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-TEN-001",
+          "rule_name": "Loan Tenure",
+          "result": "PASS",
+          "detail": "Tenure 30m within 12-84m.",
+          "rule_version": "v1"
+        }
+      ],
+      "failed_rules": [
+        {
+          "rule_id": "AL-EMP-001",
+          "rule_name": "Employment Stability",
+          "result": "FAIL",
+          "detail": "Business 18m < required 24m."
+        },
+        {
+          "rule_id": "AL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "FAIL",
+          "detail": "FOIR 134.4% > maximum 50%."
+        },
+        {
+          "rule_id": "AL-LTV-001",
+          "rule_name": "Loan-to-Value (LTV)",
+          "result": "FAIL",
+          "detail": "LTV 100.0% > maximum 85% for new vehicle."
+        }
+      ],
+      "manual_review_rules": [],
+      "missing_fields": [],
+      "policy_version": "v1"
+    },
+    "last_calcs": {
+      "emi": 33613.34,
+      "foir": 1.3445,
+      "ltv": 1.0,
+      "max_affordable_loan": 334688.5,
+      "total_interest": 108400.2,
+      "total_payment": 1008400.2
+    },
+    "last_citations": [
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-AMT-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 8. Loan Amount **Rule ID:** AL-AMT-001 The minimum auto loan amount is Rs.50,000 (fifty thousand rupees). The maximum auto loan amount is Rs.50,00,000 (fifty lakh rupees). The loan amount is further limited by: - The applicable LTV ratio applied to the on-road vehicle price - The maximum affordab"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-DOC-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 10. Documentation Requirements **Rule ID:** AL-DOC-001 The following documents are required for an auto loan application: For all applicants: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Last 6 months bank "
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-LTV-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** AL-LTV-001 The Loan-to-Value ratio is calculated on the on-road price of the vehicle (ex-showroom price plus registration, insurance, and taxes). For new vehicles: maximum LTV of 85% of on-road price. For used/pre-owned vehicles: maximum LTV of 70% of on-"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-EXC-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 11. Exceptions and Manual Review Cases **Rule ID:** AL-EXC-001 The following cases are subject to manual underwriting review: - Used electric vehicles (EVs) financed for the first time - Commercial vehicle loans above Rs.20 lakh for new borrowers - Applicants with credit scores between 660 and 67"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-VEH-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 7. Vehicle Eligibility **Rule ID:** AL-VEH-001 The following vehicle types are eligible for financing: - Two-wheelers: motorcycles and scooters (new and used) - Four-wheelers: passenger cars, SUVs, MUVs (new and used) - Commercial vehicles: trucks, buses, vans used for business (new only) - Elect"
+      }
+    ],
+    "last_app_id": "APP-2783273355BA",
+    "product": "auto_loan"
+  },
+  "conv-ea380be1": {
+    "session_id": "conv-ea380be1",
+    "title": "An auto loan for a new…",
+    "created_at": 1790439131.8951864,
+    "updated_at": 1790439449.3504927,
+    "messages": [
+      {
+        "role": "user",
+        "content": "I need an auto loan for a new four-wheeler. On-road price is ₹12,00,000, loan amount ₹9,00,000, monthly salary ₹80,000, age 29, credit score 730, tenure 60 months, no existing EMIs."
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for sharing those details! To proceed, could you please let me know your employment type? Are you salaried, self-employed, or a business owner? Also, how long have you been employed or in business?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "salaried"
+      },
+      {
+        "role": "assistant",
+        "content": "Great! Now, could you please share how long you have been employed in your current job? Just the number of years will do.",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "2 years"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility status for the auto loan is classified as POTENTIALLY_ELIGIBLE. This means that while you meet the necessary criteria, further steps may be required before a final decision can be made.\n\nThe assessment shows that all relevant rules passed successfully. Specifically, your age of 29 is within the allowed range (Rule ID: AL-AGE-001), your monthly income of ₹80,000 exceeds the minimum requirement of ₹20,000 (Rule ID: AL-INC-001), and you have 24 months of stable salaried employment, surpassing the 12-month requirement (Rule ID: AL-EMP-001). Additionally, your credit score of 730 is above the minimum threshold of 680 (Rule ID: AL-CRD-001), and your FOIR of 23.4% is well within the maximum limit of 50% (Rule ID: AL-FOIR-001). The Loan-to-Value ratio of 75.0% is acceptable for a new vehicle (Rule ID: AL-LTV-001), and the loan amount of ₹900,000 is within policy limits (Rule ID: AL-AMT-001). Lastly, your loan tenure of 60 months is compliant with the required range (Rule ID: AL-TEN-001).\n\nAs you are classified as POTENTIALLY_ELIGIBLE, the next steps involve submitting the necessary documentation to proceed with your application. Please ensure you provide identity proof, address proof, bank statements, and employment verification documents as outlined in Rule ID: AL-DOC-001. \n\nIt is important to note that this status does not guarantee final loan approval, as the application will still undergo further review.",
+        "meta": {
+          "decision": {
+            "decision": "POTENTIALLY_ELIGIBLE",
+            "product": "auto_loan",
+            "rule_checks": [
+              {
+                "rule_id": "AL-AGE-001",
+                "rule_name": "Age Eligibility",
+                "result": "PASS",
+                "detail": "Age 29 is within allowed range 21-65.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income Rs.80,000 meets minimum Rs.20,000.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "PASS",
+                "detail": "Salaried employment 24m meets 12m requirement.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 730 meets minimum 680.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "PASS",
+                "detail": "FOIR 23.4% is within maximum 50%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "PASS",
+                "detail": "LTV 75.0% is within 85% limit for new vehicle.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-VEH-001",
+                "rule_name": "Vehicle Eligibility",
+                "result": "PASS",
+                "detail": "Vehicle is eligible (new).",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount Rs.900,000 is within policy limits.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 60m within 12-84m.",
+                "rule_version": "v1"
+              }
+            ],
+            "failed_rules": [],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v1"
+          },
+          "calcs": {
+            "emi": 18682.52,
+            "foir": 0.2335,
+            "ltv": 0.75,
+            "max_affordable_loan": 1926934.94,
+            "total_interest": 220951.2,
+            "total_payment": 1120951.2
+          },
+          "annual_rate": 9.0,
+          "citations": [
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-AMT-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 8. Loan Amount **Rule ID:** AL-AMT-001 The minimum auto loan amount is Rs.50,000 (fifty thousand rupees). The maximum auto loan amount is Rs.50,00,000 (fifty lakh rupees). The loan amount is further limited by: - The applicable LTV ratio applied to the on-road vehicle price - The maximum affordab"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-DOC-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 10. Documentation Requirements **Rule ID:** AL-DOC-001 The following documents are required for an auto loan application: For all applicants: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Last 6 months bank "
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-LTV-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** AL-LTV-001 The Loan-to-Value ratio is calculated on the on-road price of the vehicle (ex-showroom price plus registration, insurance, and taxes). For new vehicles: maximum LTV of 85% of on-road price. For used/pre-owned vehicles: maximum LTV of 70% of on-"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-TEN-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 9. Loan Tenure **Rule ID:** AL-TEN-001 Auto loan tenure must be between 12 months (1 year) and 84 months (7 years) for new vehicles. For used vehicles, the maximum tenure is 60 months (5 years). For commercial vehicles, the maximum tenure is 48 months (4 years). The total tenure must not cause th"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-EXC-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 11. Exceptions and Manual Review Cases **Rule ID:** AL-EXC-001 The following cases are subject to manual underwriting review: - Used electric vehicles (EVs) financed for the first time - Commercial vehicle loans above Rs.20 lakh for new borrowers - Applicants with credit scores between 660 and 67"
+            }
+          ],
+          "app_id": "APP-E8BBED7916BD",
+          "rule_checks": [
+            {
+              "rule_id": "AL-AGE-001",
+              "rule_name": "Age Eligibility",
+              "result": "PASS",
+              "detail": "Age 29 is within allowed range 21-65.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income Rs.80,000 meets minimum Rs.20,000.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-EMP-001",
+              "rule_name": "Employment Stability",
+              "result": "PASS",
+              "detail": "Salaried employment 24m meets 12m requirement.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 730 meets minimum 680.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "PASS",
+              "detail": "FOIR 23.4% is within maximum 50%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-LTV-001",
+              "rule_name": "Loan-to-Value (LTV)",
+              "result": "PASS",
+              "detail": "LTV 75.0% is within 85% limit for new vehicle.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-VEH-001",
+              "rule_name": "Vehicle Eligibility",
+              "result": "PASS",
+              "detail": "Vehicle is eligible (new).",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount Rs.900,000 is within policy limits.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 60m within 12-84m.",
+              "rule_version": "v1"
+            }
+          ]
+        }
+      }
+    ],
+    "last_decision": {
+      "decision": "POTENTIALLY_ELIGIBLE",
+      "product": "auto_loan",
+      "rule_checks": [
+        {
+          "rule_id": "AL-AGE-001",
+          "rule_name": "Age Eligibility",
+          "result": "PASS",
+          "detail": "Age 29 is within allowed range 21-65.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-INC-001",
+          "rule_name": "Minimum Income",
+          "result": "PASS",
+          "detail": "Monthly income Rs.80,000 meets minimum Rs.20,000.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-EMP-001",
+          "rule_name": "Employment Stability",
+          "result": "PASS",
+          "detail": "Salaried employment 24m meets 12m requirement.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-CRD-001",
+          "rule_name": "Credit Score",
+          "result": "PASS",
+          "detail": "Credit score 730 meets minimum 680.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "PASS",
+          "detail": "FOIR 23.4% is within maximum 50%.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-LTV-001",
+          "rule_name": "Loan-to-Value (LTV)",
+          "result": "PASS",
+          "detail": "LTV 75.0% is within 85% limit for new vehicle.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-VEH-001",
+          "rule_name": "Vehicle Eligibility",
+          "result": "PASS",
+          "detail": "Vehicle is eligible (new).",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-AMT-001",
+          "rule_name": "Loan Amount",
+          "result": "PASS",
+          "detail": "Amount Rs.900,000 is within policy limits.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-TEN-001",
+          "rule_name": "Loan Tenure",
+          "result": "PASS",
+          "detail": "Tenure 60m within 12-84m.",
+          "rule_version": "v1"
+        }
+      ],
+      "failed_rules": [],
+      "manual_review_rules": [],
+      "missing_fields": [],
+      "policy_version": "v1"
+    },
+    "last_calcs": {
+      "emi": 18682.52,
+      "foir": 0.2335,
+      "ltv": 0.75,
+      "max_affordable_loan": 1926934.94,
+      "total_interest": 220951.2,
+      "total_payment": 1120951.2
+    },
+    "last_citations": [
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-AMT-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 8. Loan Amount **Rule ID:** AL-AMT-001 The minimum auto loan amount is Rs.50,000 (fifty thousand rupees). The maximum auto loan amount is Rs.50,00,000 (fifty lakh rupees). The loan amount is further limited by: - The applicable LTV ratio applied to the on-road vehicle price - The maximum affordab"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-DOC-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 10. Documentation Requirements **Rule ID:** AL-DOC-001 The following documents are required for an auto loan application: For all applicants: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Last 6 months bank "
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-LTV-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** AL-LTV-001 The Loan-to-Value ratio is calculated on the on-road price of the vehicle (ex-showroom price plus registration, insurance, and taxes). For new vehicles: maximum LTV of 85% of on-road price. For used/pre-owned vehicles: maximum LTV of 70% of on-"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-TEN-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 9. Loan Tenure **Rule ID:** AL-TEN-001 Auto loan tenure must be between 12 months (1 year) and 84 months (7 years) for new vehicles. For used vehicles, the maximum tenure is 60 months (5 years). For commercial vehicles, the maximum tenure is 48 months (4 years). The total tenure must not cause th"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-EXC-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 11. Exceptions and Manual Review Cases **Rule ID:** AL-EXC-001 The following cases are subject to manual underwriting review: - Used electric vehicles (EVs) financed for the first time - Commercial vehicle loans above Rs.20 lakh for new borrowers - Applicants with credit scores between 660 and 67"
+      }
+    ],
+    "last_app_id": "APP-E8BBED7916BD",
+    "product": "auto_loan"
+  },
+  "conv-7de1ee3f": {
+    "session_id": "conv-7de1ee3f",
+    "title": "What documents do I need to…",
+    "created_at": 1790440983.4625964,
+    "updated_at": 1790440990.6691666,
+    "messages": [
+      {
+        "role": "user",
+        "content": "What documents do I need to prepare for a home loan application?"
+      },
+      {
+        "role": "assistant",
+        "content": "To apply for a home loan, you will need to prepare the following documents:\n\n**Documents required for Home Loan:**\n- **Identity proof:** Aadhaar card + PAN card (mandatory)\n- **Address proof:** Utility bill, bank statement, or rental agreement\n- **Income proof:** Last 3 months pay slips / last 2 years audited financials\n- **Bank statements:** Last 12 months bank statements (for salaried applicants) / 24 months (for self-employed applicants)\n- **Form 16:** For the last 2 years (salaried applicants)\n- **Property documents:** Sale agreement or allotment letter\n- **Title documents:** Title deed and chain of title documents\n- **Building approvals:** Approved building plan and NOC from builder or housing society\n- **Tax receipts:** Property tax receipts (latest)\n\nMake sure to gather all these documents to ensure a smooth application process. If you have any further questions, feel free to ask!",
+        "meta": {}
+      }
+    ],
+    "last_decision": null,
+    "last_calcs": null,
+    "last_citations": [],
+    "last_app_id": null,
+    "product": null
   }
 }

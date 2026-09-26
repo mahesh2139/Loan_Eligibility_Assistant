@@ -46,7 +46,7 @@ LOAN_TYPE_ALIAS_MAP = {
 VEHICLE_CATEGORY_HINTS = {
     "two_wheeler":  ["scooter", "bike", "motorcycle", "two wheeler", "two-wheeler", "activa", "pulsar", "splendor", "two_wheeler"],
     "commercial":   ["bus", "truck", "lorry", "van", "tempo", "commercial"],
-    "four_wheeler": ["car", "suv", "sedan", "hatchback", "four wheeler", "four-wheeler", "muv", "four_wheeler"],
+    "four_wheeler": ["car", "suv", "sedan", "hatchback", "four wheeler", "four-wheeler", "muv", "four_wheeler", "vehicle", "automobile", "auto"],
 }
 
 # Keywords that trigger document checklist inclusion in response
@@ -110,6 +110,8 @@ Conversion rules:
 - auto_loan: clear all property fields (set null)
 - Annual income -> divide by 12 for monthly
 - Duration in years -> multiply by 12 for months
+- "employment_duration_months" is work/business experience (e.g. "2 years in business" -> employment_duration_months = 24).
+- "requested_tenure_months" is ONLY the loan repayment tenure explicitly chosen for the loan (e.g. "36 months tenure", "loan for 5 years"). NEVER assign business or employment duration to requested_tenure_months. If loan tenure is not explicitly mentioned, requested_tenure_months MUST be null.
 - Amounts in lakhs: "5 lakhs" = 500000, "1 crore" = 10000000
 - CIBIL score = credit score
 - on_road_price = ex-showroom price + registration + insurance + taxes
@@ -265,19 +267,61 @@ def extract_profile(
     data = _parse_profile_json(raw)
     data = _normalise(data)
 
-    # Detect vehicle category from recent user text if not extracted by LLM
-    if data.get("loan_type") == "auto_loan" and data.get("vehicle_category") is None:
-        recent_text = ""
-        for msg in reversed(history):
-            if msg.get("role") == "user":
-                recent_text = msg.get("content", "")
-                break
-        detected_cat = _detect_vehicle_category_from_text(recent_text)
-        if detected_cat:
-            data["vehicle_category"] = detected_cat
+    # Collect all user text across the entire conversation history
+    all_user_text = " ".join(
+        msg.get("content", "") for msg in history if msg.get("role") == "user"
+    )
+
+    if data.get("loan_type") == "auto_loan":
+        # Vehicle category
+        if data.get("vehicle_category") is None:
+            detected_cat = _detect_vehicle_category_from_text(all_user_text)
+            data["vehicle_category"] = detected_cat or "four_wheeler"
+
+        # Vehicle condition (new vs used)
+        if data.get("vehicle_type") is None:
+            if re.search(r"\b(used|second\s*hand|pre-owned|preowned)\b", all_user_text, re.IGNORECASE):
+                data["vehicle_type"] = "used"
+            elif re.search(r"\b(new|brand\s*new)\b", all_user_text, re.IGNORECASE):
+                data["vehicle_type"] = "new"
+            else:
+                data["vehicle_type"] = "new"
+
+        # Mutual synchronization of requested_amount and on_road_price
+        if data.get("on_road_price") and not data.get("requested_amount"):
+            data["requested_amount"] = data["on_road_price"]
+        elif data.get("requested_amount") and not data.get("on_road_price"):
+            data["on_road_price"] = data["requested_amount"]
+
+    # Detect tenure explicitly specified in text if not extracted
+    if data.get("requested_tenure_months") is None:
+        tenure_year_match = re.search(r"\b(?:loan\s*)?(?:tenure|term)\s*(?:is|of|=|:)?\s*(\d+)\s*(?:years?|yrs?)\b", all_user_text, re.IGNORECASE)
+        if tenure_year_match:
+            try:
+                data["requested_tenure_months"] = int(tenure_year_match.group(1)) * 12
+            except ValueError:
+                pass
+        else:
+            tenure_month_match = re.search(r"\b(?:loan\s*)?(?:tenure|term)\s*(?:is|of|=|:)?\s*(\d+)\s*(?:months?|m)\b", all_user_text, re.IGNORECASE)
+            if tenure_month_match:
+                try:
+                    data["requested_tenure_months"] = int(tenure_month_match.group(1))
+                except ValueError:
+                    pass
 
     # Merge with prior profile
     merged_data = _merge_profiles(prior_profile, data)
+
+    # Re-apply auto-loan mutual synchronization on merged data
+    if merged_data.get("loan_type") == "auto_loan":
+        if merged_data.get("on_road_price") and not merged_data.get("requested_amount"):
+            merged_data["requested_amount"] = merged_data["on_road_price"]
+        elif merged_data.get("requested_amount") and not merged_data.get("on_road_price"):
+            merged_data["on_road_price"] = merged_data["requested_amount"]
+        if not merged_data.get("vehicle_category"):
+            merged_data["vehicle_category"] = "four_wheeler"
+        if not merged_data.get("vehicle_type"):
+            merged_data["vehicle_type"] = "new"
 
     profile = ApplicantProfile(
         loan_type                  = merged_data.get("loan_type"),

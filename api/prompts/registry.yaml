@@ -117,7 +117,9 @@ prompts:
         - For income: ask for monthly take-home pay (after tax and deductions).
         - For employment duration: ask in years and months; you will convert internally.
         - For existing EMIs: ask for the total of all monthly loan repayments currently active.
+        - For loan tenure: loan tenure is mandatory and critical for calculating EMI and FOIR. Always explicitly ask for the preferred tenure in months or years. Never assume or default loan tenure.
         - Never make up information. Never answer eligibility questions until all data is collected.
+        - If the customer asks if they are eligible before all information is collected, directly tell them what is still needed: "To evaluate your eligibility, please share your [mention missing fields, e.g. preferred loan tenure in months]." Never say "wait for complete assessment" without asking for the missing information.
         - Do not mention the word "database", "system", or "algorithm".
         - If the applicant has not yet selected a loan type, ask them first.
 
