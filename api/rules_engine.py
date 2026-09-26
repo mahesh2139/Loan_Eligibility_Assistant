@@ -74,6 +74,12 @@ class ApplicantProfile:
     property_location:      Optional[str]   = None
     existing_property_loan: Optional[bool]  = None
 
+    # Auto Loan additional fields
+    vehicle_type:      Optional[str]   = None  # "new" | "used"
+    vehicle_age_years: Optional[int]   = None  # age of used vehicle in years
+    on_road_price:     Optional[float] = None  # total on-road price INR
+    vehicle_category:  Optional[str]   = None  # "two_wheeler" | "four_wheeler" | "commercial"
+
     def to_dict(self) -> Dict[str, Any]:
         return {k: v for k, v in asdict(self).items() if v is not None}
 
@@ -86,6 +92,8 @@ class ApplicantProfile:
         ]
         if self.loan_type == "home_loan":
             return common + ["property_value", "down_payment", "property_type"]
+        if self.loan_type == "auto_loan":
+            return common + ["vehicle_type", "on_road_price", "vehicle_category"]
         return common  # personal_loan
 
     def missing_fields(self) -> List[str]:
@@ -163,6 +171,29 @@ HOME_LOAN_CONFIG: Dict[str, Any] = {
     "MAX_LOAN_AMOUNT":                     5_00_00_000,
     "MIN_TENURE_MONTHS":                   12,
     "MAX_TENURE_MONTHS":                   360,
+}
+
+AUTO_LOAN_CONFIG: Dict[str, Any] = {
+    "MIN_AGE":                             21,
+    "MAX_AGE":                             65,
+    "MAX_LOAN_CLOSE_AGE":                  70,
+    "MIN_MONTHLY_INCOME":                  20_000,
+    "MIN_EMP_MONTHS_SALARIED":             12,
+    "MIN_EMP_MONTHS_SELF_EMPLOYED":        24,
+    "MIN_CREDIT_SCORE":                    680,
+    "MAX_FOIR":                            0.50,
+    "ANNUAL_RATE_PCT":                     9.0,
+    "MAX_LTV_NEW_VEHICLE":                 0.85,
+    "MAX_LTV_USED_VEHICLE":                0.70,
+    "MAX_USED_VEHICLE_AGE_YEARS":          10,
+    "MAX_VEHICLE_AGE_AT_MATURITY_YEARS":   15,
+    "ELIGIBLE_VEHICLE_CATEGORIES":         {"two_wheeler", "four_wheeler", "commercial"},
+    "MIN_LOAN_AMOUNT":                     50_000,
+    "MAX_LOAN_AMOUNT":                     50_00_000,
+    "MIN_TENURE_MONTHS":                   12,
+    "MAX_TENURE_MONTHS":                   84,
+    "MAX_TENURE_USED_MONTHS":              60,
+    "MAX_TENURE_COMMERCIAL_MONTHS":        48,
 }
 
 
@@ -429,6 +460,145 @@ def _hl_tenure(p: ApplicantProfile, cfg: dict) -> RuleCheck:
 
 
 # ---------------------------------------------------------------------------
+# Auto Loan rule evaluators
+# ---------------------------------------------------------------------------
+
+def _al_age(p: ApplicantProfile, cfg: dict) -> RuleCheck:
+    if p.age is None:
+        return RuleCheck("AL-AGE-001", "Age Eligibility", RuleResult.NOT_EVALUATED, "Age not provided.")
+    if p.age < cfg["MIN_AGE"]:
+        return RuleCheck("AL-AGE-001", "Age Eligibility", RuleResult.FAIL,
+                         f"Age {p.age} < minimum {cfg['MIN_AGE']}.")
+    if p.age > cfg["MAX_AGE"]:
+        return RuleCheck("AL-AGE-001", "Age Eligibility", RuleResult.FAIL,
+                         f"Age {p.age} > maximum {cfg['MAX_AGE']}.")
+    if p.requested_tenure_months:
+        close_age = p.age + p.requested_tenure_months / 12.0
+        if close_age > cfg["MAX_LOAN_CLOSE_AGE"]:
+            return RuleCheck("AL-AGE-001", "Age Eligibility", RuleResult.FAIL,
+                             f"Loan closes at age {close_age:.1f}, exceeds limit {cfg['MAX_LOAN_CLOSE_AGE']}.")
+    return RuleCheck("AL-AGE-001", "Age Eligibility", RuleResult.PASS,
+                     f"Age {p.age} is within allowed range {cfg['MIN_AGE']}-{cfg['MAX_AGE']}.")
+
+
+def _al_income(p: ApplicantProfile, cfg: dict) -> RuleCheck:
+    if p.monthly_net_income is None:
+        return RuleCheck("AL-INC-001", "Minimum Income", RuleResult.NOT_EVALUATED, "Monthly income not provided.")
+    minc = cfg["MIN_MONTHLY_INCOME"]
+    if p.monthly_net_income < minc:
+        return RuleCheck("AL-INC-001", "Minimum Income", RuleResult.FAIL,
+                         f"Monthly income Rs.{p.monthly_net_income:,.0f} < minimum Rs.{minc:,.0f}.")
+    return RuleCheck("AL-INC-001", "Minimum Income", RuleResult.PASS,
+                     f"Monthly income Rs.{p.monthly_net_income:,.0f} meets minimum Rs.{minc:,.0f}.")
+
+
+def _al_employment(p: ApplicantProfile, cfg: dict) -> RuleCheck:
+    if p.employment_type is None or p.employment_duration_months is None:
+        return RuleCheck("AL-EMP-001", "Employment Stability", RuleResult.NOT_EVALUATED,
+                         "Employment type or duration not provided.")
+    if p.employment_type == "salaried":
+        req = cfg["MIN_EMP_MONTHS_SALARIED"]
+        if p.employment_duration_months < req:
+            return RuleCheck("AL-EMP-001", "Employment Stability", RuleResult.FAIL,
+                             f"Salaried employment {p.employment_duration_months}m < required {req}m.")
+        return RuleCheck("AL-EMP-001", "Employment Stability", RuleResult.PASS,
+                         f"Salaried employment {p.employment_duration_months}m meets {req}m requirement.")
+    else:
+        req = cfg["MIN_EMP_MONTHS_SELF_EMPLOYED"]
+        if p.employment_duration_months < req:
+            return RuleCheck("AL-EMP-001", "Employment Stability", RuleResult.FAIL,
+                             f"Business {p.employment_duration_months}m < required {req}m.")
+        return RuleCheck("AL-EMP-001", "Employment Stability", RuleResult.PASS,
+                         f"Business {p.employment_duration_months}m meets {req}m requirement.")
+
+
+def _al_credit(p: ApplicantProfile, cfg: dict) -> RuleCheck:
+    if p.credit_score is None:
+        return RuleCheck("AL-CRD-001", "Credit Score", RuleResult.NOT_EVALUATED, "Credit score not provided.")
+    if p.credit_score < cfg["MIN_CREDIT_SCORE"]:
+        return RuleCheck("AL-CRD-001", "Credit Score", RuleResult.FAIL,
+                         f"Credit score {p.credit_score} < minimum {cfg['MIN_CREDIT_SCORE']}.")
+    return RuleCheck("AL-CRD-001", "Credit Score", RuleResult.PASS,
+                     f"Credit score {p.credit_score} meets minimum {cfg['MIN_CREDIT_SCORE']}.")
+
+
+def _al_foir(p: ApplicantProfile, cfg: dict, calcs) -> RuleCheck:
+    if calcs.foir is None:
+        return RuleCheck("AL-FOIR-001", "FOIR", RuleResult.NOT_EVALUATED,
+                         "FOIR cannot be computed (missing income/amount/tenure).")
+    max_foir = cfg["MAX_FOIR"]
+    pct = calcs.foir * 100
+    if calcs.foir > max_foir:
+        return RuleCheck("AL-FOIR-001", "FOIR", RuleResult.FAIL,
+                         f"FOIR {pct:.1f}% > maximum {max_foir * 100:.0f}%.")
+    return RuleCheck("AL-FOIR-001", "FOIR", RuleResult.PASS,
+                     f"FOIR {pct:.1f}% is within maximum {max_foir * 100:.0f}%.")
+
+
+def _al_ltv(p: ApplicantProfile, cfg: dict, calcs) -> RuleCheck:
+    if calcs.ltv is None:
+        return RuleCheck("AL-LTV-001", "Loan-to-Value (LTV)", RuleResult.NOT_EVALUATED,
+                         "LTV cannot be computed (missing on-road price or loan amount).")
+    is_used = (p.vehicle_type == "used")
+    max_ltv = cfg["MAX_LTV_USED_VEHICLE"] if is_used else cfg["MAX_LTV_NEW_VEHICLE"]
+    pct = calcs.ltv * 100
+    label = "used" if is_used else "new"
+    if calcs.ltv > max_ltv:
+        return RuleCheck("AL-LTV-001", "Loan-to-Value (LTV)", RuleResult.FAIL,
+                         f"LTV {pct:.1f}% > maximum {max_ltv * 100:.0f}% for {label} vehicle.")
+    return RuleCheck("AL-LTV-001", "Loan-to-Value (LTV)", RuleResult.PASS,
+                     f"LTV {pct:.1f}% is within {max_ltv * 100:.0f}% limit for {label} vehicle.")
+
+
+def _al_vehicle(p: ApplicantProfile, cfg: dict) -> RuleCheck:
+    if p.vehicle_type is None:
+        return RuleCheck("AL-VEH-001", "Vehicle Eligibility", RuleResult.NOT_EVALUATED,
+                         "Vehicle type (new/used) not provided.")
+    if p.vehicle_type == "used" and p.vehicle_age_years is not None:
+        if p.vehicle_age_years > cfg["MAX_USED_VEHICLE_AGE_YEARS"]:
+            return RuleCheck("AL-VEH-001", "Vehicle Eligibility", RuleResult.FAIL,
+                             f"Used vehicle age {p.vehicle_age_years}y > maximum {cfg['MAX_USED_VEHICLE_AGE_YEARS']}y.")
+    if p.vehicle_category is not None:
+        eligible = cfg["ELIGIBLE_VEHICLE_CATEGORIES"]
+        if p.vehicle_category not in eligible:
+            return RuleCheck("AL-VEH-001", "Vehicle Eligibility", RuleResult.FAIL,
+                             f"Vehicle category '{p.vehicle_category}' not eligible.")
+    return RuleCheck("AL-VEH-001", "Vehicle Eligibility", RuleResult.PASS,
+                     f"Vehicle is eligible ({p.vehicle_type or 'unspecified type'}).")
+
+
+def _al_amount(p: ApplicantProfile, cfg: dict, calcs) -> RuleCheck:
+    if p.requested_amount is None:
+        return RuleCheck("AL-AMT-001", "Loan Amount", RuleResult.NOT_EVALUATED, "Loan amount not provided.")
+    min_a, max_a = cfg["MIN_LOAN_AMOUNT"], cfg["MAX_LOAN_AMOUNT"]
+    if p.requested_amount < min_a:
+        return RuleCheck("AL-AMT-001", "Loan Amount", RuleResult.FAIL,
+                         f"Amount Rs.{p.requested_amount:,.0f} < minimum Rs.{min_a:,.0f}.")
+    if p.requested_amount > max_a:
+        return RuleCheck("AL-AMT-001", "Loan Amount", RuleResult.FAIL,
+                         f"Amount Rs.{p.requested_amount:,.0f} > maximum Rs.{max_a:,.0f}.")
+    return RuleCheck("AL-AMT-001", "Loan Amount", RuleResult.PASS,
+                     f"Amount Rs.{p.requested_amount:,.0f} is within policy limits.")
+
+
+def _al_tenure(p: ApplicantProfile, cfg: dict) -> RuleCheck:
+    if p.requested_tenure_months is None:
+        return RuleCheck("AL-TEN-001", "Loan Tenure", RuleResult.NOT_EVALUATED, "Loan tenure not provided.")
+    min_t = cfg["MIN_TENURE_MONTHS"]
+    if p.vehicle_type == "used":
+        max_t = cfg["MAX_TENURE_USED_MONTHS"]
+    elif p.vehicle_category == "commercial":
+        max_t = cfg["MAX_TENURE_COMMERCIAL_MONTHS"]
+    else:
+        max_t = cfg["MAX_TENURE_MONTHS"]
+    if p.requested_tenure_months < min_t or p.requested_tenure_months > max_t:
+        return RuleCheck("AL-TEN-001", "Loan Tenure", RuleResult.FAIL,
+                         f"Tenure {p.requested_tenure_months}m outside {min_t}-{max_t}m.")
+    return RuleCheck("AL-TEN-001", "Loan Tenure", RuleResult.PASS,
+                     f"Tenure {p.requested_tenure_months}m within {min_t}-{max_t}m.")
+
+
+# ---------------------------------------------------------------------------
 # Aggregation
 # ---------------------------------------------------------------------------
 
@@ -501,14 +671,35 @@ def evaluate_home_loan(profile: ApplicantProfile, calcs) -> EligibilityResult:
     return _aggregate(checks, missing, "home_loan")
 
 
+def evaluate_auto_loan(profile: ApplicantProfile, calcs) -> EligibilityResult:
+    """Run all Auto Loan rules. Returns EligibilityResult."""
+    cfg     = AUTO_LOAN_CONFIG
+    missing = [f for f in profile.missing_fields() if f != "loan_type"]
+    checks  = [
+        _al_age(profile, cfg),
+        _al_income(profile, cfg),
+        _al_employment(profile, cfg),
+        _al_credit(profile, cfg),
+        _al_foir(profile, cfg, calcs),
+        _al_ltv(profile, cfg, calcs),
+        _al_vehicle(profile, cfg),
+        _al_amount(profile, cfg, calcs),
+        _al_tenure(profile, cfg),
+    ]
+    return _aggregate(checks, missing, "auto_loan")
+
+
 def run_rules_engine(profile: ApplicantProfile, calcs) -> EligibilityResult:
     """Dispatch to the correct product engine based on profile.loan_type."""
     if profile.loan_type == "personal_loan":
         return evaluate_personal_loan(profile, calcs)
     if profile.loan_type == "home_loan":
         return evaluate_home_loan(profile, calcs)
+    if profile.loan_type == "auto_loan":
+        return evaluate_auto_loan(profile, calcs)
     return EligibilityResult(
         decision=Decision.INSUFFICIENT_INFORMATION,
         product="unknown",
         missing_fields=["loan_type"],
     )
+

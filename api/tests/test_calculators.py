@@ -150,6 +150,22 @@ class TestRunAllCalculators:
         assert calcs.ltv is not None
         assert calcs.ltv == pytest.approx(0.80, abs=0.01)
 
+    def test_complete_auto_loan(self):
+        calcs = run_all_calculators(
+            requested_amount=6_00_000,
+            monthly_income=60_000,
+            existing_emi=0,
+            tenure_months=48,
+            annual_rate_pct=9.0,
+            max_foir=0.50,
+            on_road_price=8_00_000,
+        )
+        assert calcs.emi is not None
+        assert calcs.foir is not None
+        assert calcs.ltv is not None
+        assert calcs.ltv == pytest.approx(0.75, abs=0.01)
+        assert calcs.max_affordable_loan is not None
+
     def test_missing_inputs(self):
         """Missing amount/tenure → emi and foir are None"""
         calcs = run_all_calculators(

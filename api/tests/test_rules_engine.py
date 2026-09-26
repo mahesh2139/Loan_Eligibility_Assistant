@@ -322,3 +322,200 @@ class TestSerialization:
         d = p.to_dict()
         assert "age" in d
         assert "monthly_net_income" not in d  # None excluded
+
+
+# =============================================================================
+# Auto Loan Tests
+# =============================================================================
+
+def _al_calcs(profile: ApplicantProfile) -> LoanCalculations:
+    from rules_engine import AUTO_LOAN_CONFIG as cfg
+    return run_all_calculators(
+        profile.requested_amount, profile.monthly_net_income, profile.existing_emi,
+        profile.requested_tenure_months, cfg["ANNUAL_RATE_PCT"], cfg["MAX_FOIR"],
+        on_road_price=profile.on_road_price,
+    )
+
+
+def _full_al_profile(**overrides) -> ApplicantProfile:
+    """Return a fully-eligible auto loan profile with optional overrides."""
+    base = dict(
+        loan_type="auto_loan",
+        age=30,
+        employment_type="salaried",
+        monthly_net_income=60_000,
+        employment_duration_months=18,
+        credit_score=720,
+        existing_emi=0,
+        requested_amount=6_00_000,
+        requested_tenure_months=48,
+        vehicle_type="new",
+        on_road_price=8_00_000,
+        vehicle_category="four_wheeler",
+    )
+    base.update(overrides)
+    return ApplicantProfile(**base)
+
+
+class TestAutoLoanEligible:
+    def test_fully_eligible_new_car(self):
+        p = _full_al_profile()
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.POTENTIALLY_ELIGIBLE
+        assert all(rc.result == RuleResult.PASS for rc in r.rule_checks
+                   if rc.result != RuleResult.NOT_EVALUATED)
+
+    def test_eligible_two_wheeler(self):
+        p = _full_al_profile(
+            vehicle_category="two_wheeler",
+            on_road_price=1_50_000,
+            requested_amount=1_20_000,
+            requested_tenure_months=36,
+        )
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.POTENTIALLY_ELIGIBLE
+
+    def test_eligible_self_employed_sufficient_tenure(self):
+        p = _full_al_profile(
+            employment_type="self_employed",
+            employment_duration_months=30,
+        )
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.POTENTIALLY_ELIGIBLE
+
+
+class TestAutoLoanNotEligible:
+    def test_age_below_minimum(self):
+        p = _full_al_profile(age=19)
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.NOT_ELIGIBLE
+        rule_ids = [rc.rule_id for rc in r.failed_rules]
+        assert "AL-AGE-001" in rule_ids
+
+    def test_credit_score_below_minimum(self):
+        p = _full_al_profile(credit_score=650)
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.NOT_ELIGIBLE
+        rule_ids = [rc.rule_id for rc in r.failed_rules]
+        assert "AL-CRD-001" in rule_ids
+
+    def test_ltv_too_high_for_used_vehicle(self):
+        # Used car: on_road_price=500000, loan=400000 -> LTV=80% > 70% limit
+        p = _full_al_profile(
+            vehicle_type="used",
+            on_road_price=5_00_000,
+            requested_amount=4_00_000,
+            vehicle_age_years=5,
+        )
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.NOT_ELIGIBLE
+        rule_ids = [rc.rule_id for rc in r.failed_rules]
+        assert "AL-LTV-001" in rule_ids
+
+    def test_ltv_acceptable_for_new_vehicle(self):
+        # New car: on_road_price=800000, loan=640000 -> LTV=80% < 85% limit
+        p = _full_al_profile(
+            vehicle_type="new",
+            on_road_price=8_00_000,
+            requested_amount=6_40_000,
+        )
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.POTENTIALLY_ELIGIBLE
+
+    def test_foir_too_high(self):
+        # existing_emi=25000 + new EMI >> 50% of income=60000
+        p = _full_al_profile(existing_emi=25_000)
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.NOT_ELIGIBLE
+        rule_ids = [rc.rule_id for rc in r.failed_rules]
+        assert "AL-FOIR-001" in rule_ids
+
+    def test_income_below_minimum(self):
+        p = _full_al_profile(monthly_net_income=15_000)
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.NOT_ELIGIBLE
+        rule_ids = [rc.rule_id for rc in r.failed_rules]
+        assert "AL-INC-001" in rule_ids
+
+    def test_tenure_exceeds_used_vehicle_max(self):
+        # Used vehicle max tenure: 60 months
+        p = _full_al_profile(vehicle_type="used", requested_tenure_months=72, vehicle_age_years=3)
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.NOT_ELIGIBLE
+        rule_ids = [rc.rule_id for rc in r.failed_rules]
+        assert "AL-TEN-001" in rule_ids
+
+    def test_used_vehicle_too_old(self):
+        p = _full_al_profile(vehicle_type="used", vehicle_age_years=12)
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.NOT_ELIGIBLE
+        rule_ids = [rc.rule_id for rc in r.failed_rules]
+        assert "AL-VEH-001" in rule_ids
+
+    def test_employment_too_short_salaried(self):
+        p = _full_al_profile(employment_duration_months=8)
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.NOT_ELIGIBLE
+        rule_ids = [rc.rule_id for rc in r.failed_rules]
+        assert "AL-EMP-001" in rule_ids
+
+    def test_employment_too_short_self_employed(self):
+        p = _full_al_profile(employment_type="self_employed", employment_duration_months=18)
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.NOT_ELIGIBLE
+        rule_ids = [rc.rule_id for rc in r.failed_rules]
+        assert "AL-EMP-001" in rule_ids
+
+
+class TestAutoLoanInsufficientInfo:
+    def test_missing_all_auto_fields(self):
+        p = ApplicantProfile(loan_type="auto_loan")
+        c = LoanCalculations()
+        r = run_rules_engine(p, c)
+        assert r.decision == Decision.INSUFFICIENT_INFORMATION
+
+    def test_missing_vehicle_type(self):
+        p = _full_al_profile(vehicle_type=None)
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        # vehicle_type is required; profile.missing_fields() will list it
+        assert "vehicle_type" in p.missing_fields()
+
+    def test_dispatcher_returns_auto_loan_result(self):
+        p = _full_al_profile()
+        c = _al_calcs(p)
+        r = run_rules_engine(p, c)
+        assert r.product == "auto_loan"
+
+
+class TestAutoLoanProfile:
+    def test_required_fields_auto_loan(self):
+        p = ApplicantProfile(loan_type="auto_loan")
+        req = p.required_fields()
+        assert "vehicle_type" in req
+        assert "on_road_price" in req
+        assert "vehicle_category" in req
+        # Property fields should NOT be required for auto loan
+        assert "property_value" not in req
+        assert "down_payment" not in req
+
+    def test_missing_fields_auto_loan_complete(self):
+        p = _full_al_profile()
+        assert len(p.missing_fields()) == 0
+
+    def test_missing_fields_auto_loan_incomplete(self):
+        p = _full_al_profile(on_road_price=None)
+        assert "on_road_price" in p.missing_fields()

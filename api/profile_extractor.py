@@ -1,16 +1,14 @@
-"""profile_extractor.py — LLM-based applicant profile extraction.
+"""profile_extractor.py -- LLM-based applicant profile extraction.
 
-Extracts structured ApplicantProfile fields from free-form conversation history.
-The LLM ONLY extracts — it does NOT make eligibility decisions.
+Extracts structured ApplicantProfile fields from free-form conversation.
+The LLM ONLY extracts -- it does NOT make eligibility decisions.
 
-Design:
-  • Sends the full conversation to the LLM with a strict JSON extraction prompt
-  • Returns an ApplicantProfile dataclass + list of missing required fields
-  • Any field not mentioned → None (rules engine treats as NOT_EVALUATED)
-  • Conversions applied:
-      - Annual income → divide by 12 for monthly
-      - "X years" → multiply by 12 for months
-      - loan type aliases: "house loan", "housing loan" → "home_loan"
+Key features:
+  * Semantic loan-type detection (no hard labels required from user)
+  * Auto Loan support: vehicle_type, vehicle_age_years, on_road_price, vehicle_category
+  * Profile MERGE: prior_profile fields kept; new fields overlay them
+    so the assistant never re-asks for already-provided information
+  * Document checklist returned only when user explicitly asks
 """
 import json
 import logging
@@ -19,21 +17,60 @@ from typing import Optional, Tuple
 
 logger = logging.getLogger("loanassist.profile")
 
-# Import from same package
 from rules_engine import ApplicantProfile
 
 
-# ── extraction prompt ─────────────────────────────────────────────────────────
+# ---------------------------------------------------------------------------
+# Loan type alias map (Python fallback after LLM normalisation)
+# ---------------------------------------------------------------------------
+
+LOAN_TYPE_ALIAS_MAP = {
+    # Home loan variants
+    "home_loan": "home_loan", "housing_loan": "home_loan", "house_loan": "home_loan",
+    "mortgage": "home_loan", "property_loan": "home_loan", "building_loan": "home_loan",
+    "construction_loan": "home_loan", "flat_loan": "home_loan", "apartment_loan": "home_loan",
+    "real_estate_loan": "home_loan",
+    # Personal loan variants
+    "personal_loan": "personal_loan", "consumer_loan": "personal_loan", "pl": "personal_loan",
+    "instant_loan": "personal_loan", "salary_loan": "personal_loan", "cash_loan": "personal_loan",
+    # Auto loan variants
+    "auto_loan": "auto_loan", "car_loan": "auto_loan", "vehicle_loan": "auto_loan",
+    "scooter_loan": "auto_loan", "bike_loan": "auto_loan", "motorcycle_loan": "auto_loan",
+    "two_wheeler_loan": "auto_loan", "four_wheeler_loan": "auto_loan",
+    "bus_loan": "auto_loan", "truck_loan": "auto_loan",
+    "commercial_vehicle_loan": "auto_loan", "ev_loan": "auto_loan",
+    "electric_vehicle_loan": "auto_loan", "automobile_loan": "auto_loan",
+    "used_car_loan": "auto_loan", "second_hand_car_loan": "auto_loan",
+}
+
+VEHICLE_CATEGORY_HINTS = {
+    "two_wheeler":  ["scooter", "bike", "motorcycle", "two wheeler", "two-wheeler", "activa", "pulsar", "splendor", "two_wheeler"],
+    "commercial":   ["bus", "truck", "lorry", "van", "tempo", "commercial"],
+    "four_wheeler": ["car", "suv", "sedan", "hatchback", "four wheeler", "four-wheeler", "muv", "four_wheeler"],
+}
+
+# Keywords that trigger document checklist inclusion in response
+DOC_REQUEST_KEYWORDS = {
+    "document", "documents", "docs", "doc", "papers", "paperwork",
+    "required", "checklist", "what do i need", "what documents",
+    "what papers", "what to bring", "what to submit", "submission",
+    "application documents", "supporting documents",
+}
+
+
+# ---------------------------------------------------------------------------
+# Extraction prompt
+# ---------------------------------------------------------------------------
 
 EXTRACTION_SYSTEM_PROMPT = """\
 You are a structured data extractor for a loan eligibility assistant.
 
 Given a conversation, extract all applicant-provided information into a
-JSON object. Return ONLY valid JSON — no explanations, no markdown.
+JSON object. Return ONLY valid JSON -- no explanations, no markdown.
 
 Schema (use null for any unknown field):
 {
-  "loan_type":                  "personal_loan" | "home_loan" | null,
+  "loan_type":                  "personal_loan" | "home_loan" | "auto_loan" | null,
   "age":                        integer | null,
   "employment_type":            "salaried" | "self_employed" | "business" | null,
   "monthly_net_income":         float (INR, monthly) | null,
@@ -46,35 +83,48 @@ Schema (use null for any unknown field):
   "down_payment":               float (INR) | null,
   "property_type":              "apartment" | "villa" | "residential_house" | "plot" | "commercial" | null,
   "property_location":          string | null,
-  "existing_property_loan":     boolean | null
+  "existing_property_loan":     boolean | null,
+  "vehicle_type":               "new" | "used" | null,
+  "vehicle_age_years":          integer | null,
+  "on_road_price":              float (INR) | null,
+  "vehicle_category":           "two_wheeler" | "four_wheeler" | "commercial" | null
 }
 
+Semantic loan type detection (infer from context -- do not require exact phrasing):
+- home loan, house loan, housing loan, building loan, construction loan, flat loan,
+  apartment loan, mortgage, property loan -> "home_loan"
+- personal loan, consumer loan, salary loan, cash loan, instant loan -> "personal_loan"
+- car loan, vehicle loan, auto loan, scooter loan, bike loan, motorcycle loan,
+  two-wheeler loan, four-wheeler loan, bus loan, truck loan, commercial vehicle loan,
+  EV loan, electric vehicle loan, used car loan, second-hand car -> "auto_loan"
+
+Vehicle category detection:
+- scooter, bike, motorcycle, two-wheeler, Activa, Pulsar -> "two_wheeler"
+- car, SUV, sedan, hatchback, MUV, four-wheeler -> "four_wheeler"
+- bus, truck, lorry, van, tempo -> "commercial"
+
 Conversion rules:
-- If the applicant switches or requests a different loan product (e.g. from home loan to personal loan, or vice versa), loan_type MUST be the LATEST requested loan product.
-- When loan_type is personal_loan, all property fields (property_value, down_payment, property_type, property_location, existing_property_loan) must be null.
-- If income is stated as annual, divide by 12 and store monthly result
-- If duration is stated in years, multiply by 12 and store months
-- "house loan", "housing loan", "mortgage", "home loan" → "home_loan"
-- "personal loan", "consumer loan" → "personal_loan"
-- "salary", "take-home" → monthly_net_income (assume monthly unless annual stated)
+- If the applicant switches loan product, loan_type MUST be the LATEST requested product.
+- personal_loan: clear all property and vehicle fields (set null)
+- home_loan: clear all vehicle fields (set null)
+- auto_loan: clear all property fields (set null)
+- Annual income -> divide by 12 for monthly
+- Duration in years -> multiply by 12 for months
 - Amounts in lakhs: "5 lakhs" = 500000, "1 crore" = 10000000
 - CIBIL score = credit score
+- on_road_price = ex-showroom price + registration + insurance + taxes
 
-Extract only what the applicant has explicitly stated. Do not infer or guess
-values that were not mentioned. Use null for anything not stated.
+Extract only what is explicitly stated. Do not infer. Use null for unstated fields.
 """
 
 
 def _build_extraction_messages(history: list[dict]) -> list[dict]:
-    """Build LLM messages for profile extraction from conversation history."""
-    # Flatten history to a readable transcript
     transcript_lines = []
     for msg in history:
         role    = msg.get("role", "user").capitalize()
         content = msg.get("content", "")
         transcript_lines.append(f"{role}: {content}")
     transcript = "\n".join(transcript_lines)
-
     return [
         {"role": "system", "content": EXTRACTION_SYSTEM_PROMPT},
         {"role": "user",   "content": f"Conversation:\n{transcript}"},
@@ -82,10 +132,7 @@ def _build_extraction_messages(history: list[dict]) -> list[dict]:
 
 
 def _parse_profile_json(raw: str) -> dict:
-    """Extract JSON from LLM output, tolerating markdown code fences."""
-    # Strip ```json ... ``` or ``` ... ```
     stripped = re.sub(r"```(?:json)?", "", raw).strip()
-    # Find first { ... } block
     start = stripped.find("{")
     end   = stripped.rfind("}") + 1
     if start == -1 or end == 0:
@@ -97,10 +144,9 @@ def _parse_profile_json(raw: str) -> dict:
 
 
 def _normalise(data: dict) -> dict:
-    """Apply type coercions and clean up extracted values."""
-    # Ensure numeric types
+    """Type coercions, alias normalisation, and cross-field consistency."""
     for float_field in ("monthly_net_income", "existing_emi", "requested_amount",
-                        "property_value", "down_payment"):
+                        "property_value", "down_payment", "on_road_price"):
         v = data.get(float_field)
         if v is not None:
             try:
@@ -109,7 +155,7 @@ def _normalise(data: dict) -> dict:
                 data[float_field] = None
 
     for int_field in ("age", "credit_score", "employment_duration_months",
-                      "requested_tenure_months"):
+                      "requested_tenure_months", "vehicle_age_years"):
         v = data.get(int_field)
         if v is not None:
             try:
@@ -117,33 +163,90 @@ def _normalise(data: dict) -> dict:
             except (TypeError, ValueError):
                 data[int_field] = None
 
-    # Normalise loan_type aliases
+    # Normalise loan_type via alias map
     lt = data.get("loan_type")
     if isinstance(lt, str):
-        lt_lower = lt.lower().replace(" ", "_")
-        if lt_lower in ("home_loan", "housing_loan", "house_loan", "mortgage"):
-            data["loan_type"] = "home_loan"
-        elif lt_lower in ("personal_loan", "consumer_loan", "pl"):
-            data["loan_type"] = "personal_loan"
+        lt_norm = lt.lower().replace(" ", "_").replace("-", "_")
+        canonical = LOAN_TYPE_ALIAS_MAP.get(lt_norm)
+        if canonical:
+            data["loan_type"] = canonical
+        elif lt_norm not in ("personal_loan", "home_loan", "auto_loan"):
+            data["loan_type"] = None  # unknown -- conversation agent will ask
 
-    # Normalise property_type
+    # Normalise property_type and vehicle fields
     pt = data.get("property_type")
     if isinstance(pt, str):
         data["property_type"] = pt.lower().replace(" ", "_")
+    vt = data.get("vehicle_type")
+    if isinstance(vt, str):
+        data["vehicle_type"] = vt.lower().strip()
+    vc = data.get("vehicle_category")
+    if isinstance(vc, str):
+        data["vehicle_category"] = vc.lower().replace(" ", "_").replace("-", "_")
+
+    # Cross-field consistency
+    loan_type = data.get("loan_type")
+    if loan_type == "personal_loan":
+        for f in ("property_value", "down_payment", "property_type", "property_location",
+                  "existing_property_loan", "vehicle_type", "vehicle_age_years",
+                  "on_road_price", "vehicle_category"):
+            data[f] = None
+        if data.get("requested_tenure_months") and data["requested_tenure_months"] > 60:
+            data["requested_tenure_months"] = None
+        if data.get("requested_amount") and data["requested_amount"] > 3_000_000:
+            data["requested_amount"] = None
+    elif loan_type == "home_loan":
+        for f in ("vehicle_type", "vehicle_age_years", "on_road_price", "vehicle_category"):
+            data[f] = None
+    elif loan_type == "auto_loan":
+        for f in ("property_value", "down_payment", "property_type",
+                  "property_location", "existing_property_loan"):
+            data[f] = None
+        if data.get("requested_tenure_months") and data["requested_tenure_months"] > 84:
+            data["requested_tenure_months"] = None
 
     return data
 
 
+def _detect_vehicle_category_from_text(text: str) -> Optional[str]:
+    """Detect vehicle category from free text using keyword hints."""
+    text_lower = text.lower()
+    for category, keywords in VEHICLE_CATEGORY_HINTS.items():
+        if any(kw in text_lower for kw in keywords):
+            return category
+    return None
+
+
+def _merge_profiles(prior: Optional[ApplicantProfile], new_data: dict) -> dict:
+    """Merge new data on top of prior profile -- prevents re-asking for known fields."""
+    if prior is None:
+        return new_data
+    prior_dict = prior.to_dict()  # only non-None fields
+    merged = dict(prior_dict)
+    for k, v in new_data.items():
+        if v is not None:
+            merged[k] = v  # new data overrides prior
+    return merged
+
+
+def is_document_request(user_message: str) -> bool:
+    """Return True if the user is asking about required documents."""
+    text_lower = user_message.lower()
+    return any(kw in text_lower for kw in DOC_REQUEST_KEYWORDS)
+
+
 def extract_profile(
-    history:   list[dict],
+    history:       list[dict],
     llm_client,
-    model:     str,
+    model:         str,
+    prior_profile: Optional[ApplicantProfile] = None,
 ) -> Tuple[ApplicantProfile, list[str]]:
     """Extract ApplicantProfile from conversation history using the LLM.
 
-    Returns:
-        (profile, missing_fields)
-        missing_fields is empty when the profile is complete for the loan type.
+    Uses prior_profile as a seed so the assistant never re-asks for
+    fields that were already provided in earlier turns.
+
+    Returns: (profile, missing_fields)
     """
     messages = _build_extraction_messages(history)
 
@@ -151,81 +254,121 @@ def extract_profile(
         completion = llm_client.chat.completions.create(
             model=model,
             messages=messages,
-            max_tokens=400,
-            temperature=0,  # deterministic extraction
+            max_tokens=500,
+            temperature=0,
         )
         raw = (completion.choices[0].message.content or "").strip()
     except Exception as exc:
         logger.warning("profile_extraction_failed error=%s", type(exc).__name__)
         raw = "{}"
 
-    data    = _parse_profile_json(raw)
-    data    = _normalise(data)
+    data = _parse_profile_json(raw)
+    data = _normalise(data)
 
-    # Dynamic product switch detection from recent conversation turns
-    recent_user_text = ""
-    for msg in reversed(history):
-        if msg.get("role") == "user":
-            recent_user_text = msg.get("content", "").lower()
-            break
+    # Detect vehicle category from recent user text if not extracted by LLM
+    if data.get("loan_type") == "auto_loan" and data.get("vehicle_category") is None:
+        recent_text = ""
+        for msg in reversed(history):
+            if msg.get("role") == "user":
+                recent_text = msg.get("content", "")
+                break
+        detected_cat = _detect_vehicle_category_from_text(recent_text)
+        if detected_cat:
+            data["vehicle_category"] = detected_cat
 
-    if "personal loan" in recent_user_text or "consumer loan" in recent_user_text:
-        data["loan_type"] = "personal_loan"
-        for pf in ("property_value", "down_payment", "property_type", "property_location", "existing_property_loan"):
-            data[pf] = None
-        if data.get("requested_tenure_months") and data["requested_tenure_months"] > 60:
-            data["requested_tenure_months"] = None
-        if data.get("requested_amount") and data["requested_amount"] > 3000000:
-            data["requested_amount"] = None
-    elif any(k in recent_user_text for k in ("home loan", "housing loan", "house loan", "mortgage")):
-        data["loan_type"] = "home_loan"
+    # Merge with prior profile
+    merged_data = _merge_profiles(prior_profile, data)
 
-    # Build ApplicantProfile from extracted data — unknown fields stay None
     profile = ApplicantProfile(
-        loan_type                  = data.get("loan_type"),
-        age                        = data.get("age"),
-        employment_type            = data.get("employment_type"),
-        monthly_net_income         = data.get("monthly_net_income"),
-        employment_duration_months = data.get("employment_duration_months"),
-        credit_score               = data.get("credit_score"),
-        existing_emi               = data.get("existing_emi"),
-        requested_amount           = data.get("requested_amount"),
-        requested_tenure_months    = data.get("requested_tenure_months"),
-        property_value             = data.get("property_value"),
-        down_payment               = data.get("down_payment"),
-        property_type              = data.get("property_type"),
-        property_location          = data.get("property_location"),
-        existing_property_loan     = data.get("existing_property_loan"),
+        loan_type                  = merged_data.get("loan_type"),
+        age                        = merged_data.get("age"),
+        employment_type            = merged_data.get("employment_type"),
+        monthly_net_income         = merged_data.get("monthly_net_income"),
+        employment_duration_months = merged_data.get("employment_duration_months"),
+        credit_score               = merged_data.get("credit_score"),
+        existing_emi               = merged_data.get("existing_emi"),
+        requested_amount           = merged_data.get("requested_amount"),
+        requested_tenure_months    = merged_data.get("requested_tenure_months"),
+        property_value             = merged_data.get("property_value"),
+        down_payment               = merged_data.get("down_payment"),
+        property_type              = merged_data.get("property_type"),
+        property_location          = merged_data.get("property_location"),
+        existing_property_loan     = merged_data.get("existing_property_loan"),
+        vehicle_type               = merged_data.get("vehicle_type"),
+        vehicle_age_years          = merged_data.get("vehicle_age_years"),
+        on_road_price              = merged_data.get("on_road_price"),
+        vehicle_category           = merged_data.get("vehicle_category"),
     )
 
     missing = profile.missing_fields()
-    logger.info(
-        "profile_extracted loan_type=%s missing=%d fields",
-        profile.loan_type, len(missing),
-    )
+    logger.info("profile_extracted loan_type=%s missing=%d", profile.loan_type, len(missing))
     return profile, missing
 
 
-# ── missing-field descriptions (for UX) ──────────────────────────────────────
+# ---------------------------------------------------------------------------
+# Field labels and document checklists
+# ---------------------------------------------------------------------------
 
 FIELD_LABELS: dict[str, str] = {
-    "loan_type":                  "loan type (Personal Loan or Home Loan)",
+    "loan_type":                  "loan type (Personal Loan, Home Loan, or Auto Loan)",
     "age":                        "your age",
     "employment_type":            "employment type (salaried, self-employed, or business owner)",
     "monthly_net_income":         "monthly net income (take-home pay after deductions)",
-    "employment_duration_months": "how long you have been employed / in business",
+    "employment_duration_months": "how long you have been employed or in business",
     "credit_score":               "your credit / CIBIL score",
     "existing_emi":               "total existing monthly EMI obligations (enter 0 if none)",
     "requested_amount":           "loan amount you are requesting",
     "requested_tenure_months":    "preferred loan tenure in months",
-    # Home loan
     "property_value":             "property market value",
     "down_payment":               "down payment amount",
     "property_type":              "property type (apartment, villa, or residential house)",
+    "vehicle_type":               "vehicle condition (new or used)",
+    "on_road_price":              "total on-road price (ex-showroom + taxes + insurance)",
+    "vehicle_category":           "vehicle category (two-wheeler, four-wheeler, or commercial)",
+}
+
+DOC_CHECKLISTS = {
+    "personal_loan": [
+        "Identity proof: Aadhaar card + PAN card (mandatory)",
+        "Address proof: utility bill, bank statement, or rental agreement",
+        "Last 3 months pay slips (salaried) / last 2 years ITR (self-employed)",
+        "Last 6 months bank statements",
+        "Form 16 for the last 2 years (salaried applicants)",
+        "Business registration + GST certificate (self-employed/business)",
+    ],
+    "home_loan": [
+        "Identity proof: Aadhaar card + PAN card (mandatory)",
+        "Address proof: utility bill, bank statement, or rental agreement",
+        "Last 3 months pay slips / last 2 years audited financials",
+        "Last 12 months bank statements (salaried) / 24 months (self-employed)",
+        "Form 16 for the last 2 years (salaried applicants)",
+        "Sale agreement or allotment letter",
+        "Title deed and chain of title documents",
+        "Approved building plan and NOC from builder or housing society",
+        "Property tax receipts (latest)",
+    ],
+    "auto_loan": [
+        "Identity proof: Aadhaar card + PAN card (mandatory)",
+        "Address proof: utility bill, bank statement, or rental agreement",
+        "Last 3 months pay slips (salaried) / last 2 years ITR (self-employed)",
+        "Last 6 months bank statements",
+        "Proforma invoice or dealer quotation (new vehicle)",
+        "RC book, insurance certificate, and valuation report (used vehicle)",
+        "Form 16 for the last 2 years (salaried applicants)",
+    ],
 }
 
 
 def describe_missing(missing_fields: list[str]) -> str:
-    """Return a concise bullet list of missing field descriptions."""
-    lines = [f"• {FIELD_LABELS.get(f, f)}" for f in missing_fields]
+    lines = [f"- {FIELD_LABELS.get(f, f)}" for f in missing_fields]
+    return "\n".join(lines)
+
+
+def get_doc_checklist(loan_type: Optional[str]) -> Optional[str]:
+    """Return formatted document checklist, or None if loan_type unknown."""
+    if not loan_type or loan_type not in DOC_CHECKLISTS:
+        return None
+    items = DOC_CHECKLISTS[loan_type]
+    label = loan_type.replace("_", " ").title()
+    lines = [f"**Documents required for {label}:**"] + [f"- {item}" for item in items]
     return "\n".join(lines)

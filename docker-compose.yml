@@ -63,6 +63,7 @@ services:
       - ./rag/chroma:/app/rag/chroma # the persistent chroma index (rw)
       - chroma_cache:/home/appuser/.cache/chroma  # ~80 MB ONNX embed model, once
       - ./prompts:/app/prompts:ro
+      - ./api/app.py:/app/app.py:ro
       - ./logs:/app/logs
     env_file:
       - .env

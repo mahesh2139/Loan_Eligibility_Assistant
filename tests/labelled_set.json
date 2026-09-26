@@ -380,5 +380,112 @@
     },
     "expected_decision": "POTENTIALLY_ELIGIBLE",
     "note": "LTV=2550000/3000000=85% which is the limit for loans ≤ 30L"
+  },
+  {
+    "id": "TC-AL-001",
+    "description": "Auto loan — fully eligible salaried applicant for new car",
+    "product": "auto_loan",
+    "profile": {
+      "loan_type": "auto_loan",
+      "age": 30,
+      "employment_type": "salaried",
+      "monthly_net_income": 60000,
+      "employment_duration_months": 24,
+      "credit_score": 720,
+      "existing_emi": 0,
+      "requested_amount": 600000,
+      "requested_tenure_months": 48,
+      "vehicle_type": "new",
+      "on_road_price": 800000,
+      "vehicle_category": "four_wheeler"
+    },
+    "expected_decision": "POTENTIALLY_ELIGIBLE",
+    "expected_failed_rules": []
+  },
+  {
+    "id": "TC-AL-002",
+    "description": "Auto loan — not eligible, LTV exceeds 70% for used car (80% > 70%)",
+    "product": "auto_loan",
+    "profile": {
+      "loan_type": "auto_loan",
+      "age": 35,
+      "employment_type": "salaried",
+      "monthly_net_income": 70000,
+      "employment_duration_months": 36,
+      "credit_score": 750,
+      "existing_emi": 0,
+      "requested_amount": 400000,
+      "requested_tenure_months": 36,
+      "vehicle_type": "used",
+      "vehicle_age_years": 4,
+      "on_road_price": 500000,
+      "vehicle_category": "four_wheeler"
+    },
+    "expected_decision": "NOT_ELIGIBLE",
+    "expected_failed_rules": ["AL-LTV-001"]
+  },
+  {
+    "id": "TC-AL-003",
+    "description": "Auto loan — not eligible, credit score below 680 (650 < 680)",
+    "product": "auto_loan",
+    "profile": {
+      "loan_type": "auto_loan",
+      "age": 28,
+      "employment_type": "salaried",
+      "monthly_net_income": 50000,
+      "employment_duration_months": 18,
+      "credit_score": 650,
+      "existing_emi": 0,
+      "requested_amount": 300000,
+      "requested_tenure_months": 36,
+      "vehicle_type": "new",
+      "on_road_price": 400000,
+      "vehicle_category": "four_wheeler"
+    },
+    "expected_decision": "NOT_ELIGIBLE",
+    "expected_failed_rules": ["AL-CRD-001"]
+  },
+  {
+    "id": "TC-AL-004",
+    "description": "Auto loan — eligible two-wheeler loan",
+    "product": "auto_loan",
+    "profile": {
+      "loan_type": "auto_loan",
+      "age": 25,
+      "employment_type": "salaried",
+      "monthly_net_income": 35000,
+      "employment_duration_months": 14,
+      "credit_score": 710,
+      "existing_emi": 0,
+      "requested_amount": 100000,
+      "requested_tenure_months": 24,
+      "vehicle_type": "new",
+      "on_road_price": 130000,
+      "vehicle_category": "two_wheeler"
+    },
+    "expected_decision": "POTENTIALLY_ELIGIBLE",
+    "expected_failed_rules": []
+  },
+  {
+    "id": "TC-AL-005",
+    "description": "Auto loan — not eligible, used vehicle older than 10 years",
+    "product": "auto_loan",
+    "profile": {
+      "loan_type": "auto_loan",
+      "age": 42,
+      "employment_type": "salaried",
+      "monthly_net_income": 80000,
+      "employment_duration_months": 48,
+      "credit_score": 760,
+      "existing_emi": 0,
+      "requested_amount": 250000,
+      "requested_tenure_months": 36,
+      "vehicle_type": "used",
+      "vehicle_age_years": 12,
+      "on_road_price": 400000,
+      "vehicle_category": "four_wheeler"
+    },
+    "expected_decision": "NOT_ELIGIBLE",
+    "expected_failed_rules": ["AL-VEH-001"]
   }
 ]

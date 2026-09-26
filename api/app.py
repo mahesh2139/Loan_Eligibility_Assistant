@@ -54,11 +54,13 @@ from profile_extractor import describe_missing, extract_profile
 from prompts.loader import load_prompt
 from redact import redact
 from rules_engine import (
+    AUTO_LOAN_CONFIG as _AL_CFG,
     HOME_LOAN_CONFIG as _HL_CFG,
     PERSONAL_LOAN_CONFIG as _PL_CFG,
     ApplicantProfile,
     run_rules_engine,
 )
+from profile_extractor import is_document_request, get_doc_checklist
 
 # ── logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO)
@@ -112,7 +114,7 @@ client = OpenAI(
 )
 
 # ── FastAPI app ───────────────────────────────────────────────────────────────
-app = FastAPI(title="LoanAssist API", version="2.0.0")
+app = FastAPI(title="LoanAssist API", version="3.0.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -262,9 +264,15 @@ async def _metrics_mw(request: Request, call_next):
 
 
 # ── Pydantic models ───────────────────────────────────────────────────────────
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
 class ChatRequest(BaseModel):
     session_id: str = Field(default_factory=lambda: f"anon-{uuid.uuid4().hex[:8]}")
     message:    str
+    history:    Optional[List[ChatMessage]] = None
 
 
 class AskRequest(BaseModel):
@@ -450,6 +458,7 @@ async def _chat_producer(
     application_id: str,
     message:        str,
     queue:          asyncio.Queue,
+    client_history: Optional[List[ChatMessage]] = None,
 ):
     """Full eligibility pipeline — puts SSE events into the queue."""
     t0 = time.perf_counter()
@@ -470,12 +479,23 @@ async def _chat_producer(
             await queue.put(json.dumps({"type": "error", "content": REFUSAL}))
             return
 
+        # ── Synchronize client history if provided ────────────────────────────
+        if client_history is not None:
+            _conv_store[session_id] = [
+                {"role": m.role, "content": m.content}
+                for m in client_history
+                if m.content and m.role in ("user", "assistant")
+            ]
+
         # ── Save user turn and extract profile ────────────────────────────────
         _save_msg(session_id, "user", message)
         history = _session_history(session_id)
 
+        # Fetch prior profile for merge (prevents re-asking known fields)
+        prior_profile = _get_profile(session_id)
+
         profile, missing = await asyncio.to_thread(
-            extract_profile, history, client, LLM_MODEL
+            extract_profile, history, client, LLM_MODEL, prior_profile
         )
         _save_profile(session_id, profile)
 
@@ -484,6 +504,24 @@ async def _chat_producer(
             "profile":        profile.to_dict(),
             "missing_fields": missing,
         }))
+
+        # ── Check if user is asking about documents ───────────────────────────
+        if is_document_request(message) and profile.loan_type:
+            doc_text = get_doc_checklist(profile.loan_type)
+            if doc_text:
+                # Include checklist in the conversation agent response
+                doc_system = (
+                    "You are LoanAssist. The user is asking about required documents. "
+                    "Include the following document checklist in your response, formatted clearly.\n\n"
+                    + doc_text
+                )
+                doc_messages = [
+                    {"role": "system", "content": doc_system},
+                    *history,
+                ]
+                full_answer = await _stream_llm(doc_messages, queue, max_tokens=300)
+                _save_msg(session_id, "assistant", full_answer)
+                return
 
         # ── Branch: incomplete profile → ask for missing fields ───────────────
         if missing:
@@ -504,8 +542,13 @@ async def _chat_producer(
             return  # done; no eligibility decision yet
 
         # ── Complete profile → full assessment ────────────────────────────────
-        product = profile.loan_type  # "personal_loan" | "home_loan"
-        cfg     = _PL_CFG if product == "personal_loan" else _HL_CFG
+        product = profile.loan_type
+        if product == "personal_loan":
+            cfg = _PL_CFG
+        elif product == "home_loan":
+            cfg = _HL_CFG
+        else:
+            cfg = _AL_CFG  # auto_loan
 
         # 1. Policy RAG
         rag_query = message + " " + " ".join(f"{k}={v}" for k, v in profile.to_dict().items())
@@ -520,6 +563,7 @@ async def _chat_producer(
             annual_rate_pct  = cfg["ANNUAL_RATE_PCT"],
             max_foir         = cfg["MAX_FOIR"],
             property_value   = profile.property_value if product == "home_loan" else None,
+            on_road_price    = profile.on_road_price if product == "auto_loan" else None,
         )
 
         # 3. Deterministic rules engine
@@ -539,10 +583,25 @@ async def _chat_producer(
         full_answer = await _stream_llm(expl_messages, queue, max_tokens=600)
         _save_msg(session_id, "assistant", full_answer)
 
-        # 5. Decision event
+        # 5. Decision event with rule version details
+        active_ver = get_active_version(product)
+        rule_checks_with_version = [
+            {
+                "rule_id":      r.rule_id,
+                "rule_name":    r.rule_name,
+                "result":       r.result.value,
+                "detail":       r.detail,
+                "rule_version": active_ver,
+            }
+            for r in result.rule_checks
+        ]
+        decision_dict = result.to_dict()
+        decision_dict["policy_version"] = active_ver
+        decision_dict["rule_checks"] = rule_checks_with_version
+
         await queue.put(json.dumps({
             "type": "decision",
-            "data": result.to_dict(),
+            "data": decision_dict,
         }))
 
         # 6. Calculations event
@@ -557,17 +616,17 @@ async def _chat_producer(
             "type": "citations",
             "sources": [
                 {
-                    "doc":      s["doc"],
-                    "rule_id":  s.get("rule_id"),
-                    "version":  s.get("version"),
+                    "doc":       s["doc"],
+                    "rule_id":   s.get("rule_id"),
+                    "version":   s.get("version", active_ver),
                     "policy_id": s.get("policy_id"),
-                    "text":     s["text"][:300],
+                    "text":      s["text"][:300],
                 }
                 for s in rag_sources
             ],
         }))
 
-        # 8. Audit
+        # 8. Audit logging with explicit rule versions
         latency_ms = round((time.perf_counter() - t0) * 1000)
         audit_entry = {
             "application_id": application_id,
@@ -575,16 +634,18 @@ async def _chat_producer(
             "session_id":     session_id,
             "product":        product,
             "input_snapshot": profile.to_dict(),
-            "policy_version": get_active_version(product),
+            "policy_version": active_ver,
             "policy_id":      rag_sources[0].get("policy_id", "") if rag_sources else "",
-            "rules_applied":  [
-                {"rule_id": r.rule_id, "result": r.result.value, "detail": r.detail}
-                for r in result.rule_checks
-            ],
+            "rules_applied":  rule_checks_with_version,
             "calculations":   calcs.to_dict(),
             "decision":       result.decision.value,
             "rag_sources":    [
-                {"doc": s["doc"], "rule_id": s.get("rule_id"), "version": s.get("version")}
+                {
+                    "doc":       s["doc"],
+                    "rule_id":   s.get("rule_id"),
+                    "version":   s.get("version", active_ver),
+                    "policy_id": s.get("policy_id", ""),
+                }
                 for s in rag_sources
             ],
             "prompt_version": PROMPT_VERSION,
@@ -599,7 +660,7 @@ async def _chat_producer(
 
     except Exception as exc:
         logger.exception("chat_producer_error session=%s", session_id)
-        await queue.put(json.dumps({"type": "error", "content": str(exc)}))
+        await queue.put(json.dumps({"type": "error", "content": f"Processing error: {str(exc)}"}))
     finally:
         await queue.put(None)   # sentinel — always signal completion
 
@@ -609,14 +670,14 @@ async def _chat_producer(
 @app.get("/health")
 async def health():
     counts: dict = {}
-    for name in ["personal_loan", "home_loan", "eligibility"]:
+    for name in ["personal_loan", "home_loan", "auto_loan", "eligibility"]:
         try:
             counts[name] = _chroma.get_collection(name).count()
         except Exception:
             counts[name] = 0
     return {
         "status":        "ok",
-        "version":       "2.0.0",
+        "version":       "3.0.0",
         "llm_base_url":  LLM_BASE_URL,
         "model":         LLM_MODEL,
         "prompt_version": PROMPT_VERSION,
@@ -625,6 +686,7 @@ async def health():
         "active_policy_versions": {
             "personal_loan": get_active_version("personal_loan"),
             "home_loan":     get_active_version("home_loan"),
+            "auto_loan":     get_active_version("auto_loan"),
         },
     }
 
@@ -640,6 +702,10 @@ async def versions():
         "home_loan": {
             "active": get_active_version("home_loan"),
             "env_var": "ACTIVE_HOME_LOAN_VERSION",
+        },
+        "auto_loan": {
+            "active": get_active_version("auto_loan"),
+            "env_var": "ACTIVE_AUTO_LOAN_VERSION",
         },
         "prompt": {
             "active": PROMPT_VERSION,
@@ -669,11 +735,11 @@ async def chat_endpoint(
     session_id     = x_session_id or req.session_id
     application_id = f"APP-{uuid.uuid4().hex[:12].upper()}"
 
-    queue: asyncio.Queue = asyncio.Queue(maxsize=20)
+    queue: asyncio.Queue = asyncio.Queue(maxsize=30)
 
     async def _event_stream() -> AsyncIterator[str]:
         task = asyncio.create_task(
-            _chat_producer(session_id, application_id, req.message, queue)
+            _chat_producer(session_id, application_id, req.message, queue, req.history)
         )
         try:
             while True:
@@ -681,8 +747,15 @@ async def chat_endpoint(
                 if item is None:
                     break
                 yield f"data: {item}\n\n"
-        finally:
+        except asyncio.CancelledError:
             task.cancel()
+            raise
+        except Exception as exc:
+            logger.error("SSE stream error: %s", exc)
+            yield f'data: {{"type": "error", "content": "Stream error: {str(exc)}"}}\n\n'
+        finally:
+            if not task.done():
+                task.cancel()
 
     return StreamingResponse(
         _event_stream(),
@@ -745,7 +818,12 @@ async def scenario(req: ScenarioRequest):
         raise HTTPException(status_code=400, detail="Loan type not determined.")
 
     product = profile.loan_type
-    cfg     = _PL_CFG if product == "personal_loan" else _HL_CFG
+    if product == "personal_loan":
+        cfg = _PL_CFG
+    elif product == "home_loan":
+        cfg = _HL_CFG
+    else:
+        cfg = _AL_CFG  # auto_loan
 
     calcs = run_all_calculators(
         requested_amount = profile.requested_amount,
@@ -755,6 +833,7 @@ async def scenario(req: ScenarioRequest):
         annual_rate_pct  = cfg["ANNUAL_RATE_PCT"],
         max_foir         = cfg["MAX_FOIR"],
         property_value   = profile.property_value if product == "home_loan" else None,
+        on_road_price    = profile.on_road_price if product == "auto_loan" else None,
     )
 
     result = run_rules_engine(profile, calcs)
@@ -805,8 +884,9 @@ async def ask(
     _save_msg(session_id, "user", req.question)
     history = _session_history(session_id)
 
-    # Profile extraction (sync wrapper around async)
-    profile, missing = extract_profile(history, client, LLM_MODEL)
+    # Profile extraction with merge (prevents re-asking known fields)
+    prior_profile = _get_profile(session_id)
+    profile, missing = extract_profile(history, client, LLM_MODEL, prior_profile)
     _save_profile(session_id, profile)
 
     if missing:
@@ -840,7 +920,12 @@ async def ask(
 
     # Full assessment
     product = profile.loan_type
-    cfg     = _PL_CFG if product == "personal_loan" else _HL_CFG
+    if product == "personal_loan":
+        cfg = _PL_CFG
+    elif product == "home_loan":
+        cfg = _HL_CFG
+    else:
+        cfg = _AL_CFG  # auto_loan
 
     rag_sources = retrieve_for_product(
         req.question + " " + " ".join(f"{k}={v}" for k, v in profile.to_dict().items()),
@@ -850,7 +935,8 @@ async def ask(
     calcs  = run_all_calculators(
         profile.requested_amount, profile.monthly_net_income, profile.existing_emi,
         profile.requested_tenure_months, cfg["ANNUAL_RATE_PCT"], cfg["MAX_FOIR"],
-        profile.property_value if product == "home_loan" else None,
+        property_value=profile.property_value if product == "home_loan" else None,
+        on_road_price=profile.on_road_price if product == "auto_loan" else None,
     )
     result = run_rules_engine(profile, calcs)
 

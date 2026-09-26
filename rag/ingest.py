@@ -45,7 +45,7 @@ CHROMA_DIR   = RAG_ROOT / "chroma"
 
 # Keep the generic collection for backward compatibility with the old /ask endpoint
 GENERIC_COLLECTION = "eligibility"
-PRODUCT_COLLECTIONS = ["personal_loan", "home_loan"]
+PRODUCT_COLLECTIONS = ["personal_loan", "home_loan", "auto_loan"]
 
 # ── parsing ───────────────────────────────────────────────────────────────────
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---\s*\n", re.DOTALL)

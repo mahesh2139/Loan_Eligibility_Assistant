@@ -1,20 +1,36 @@
-"""LoanAssist — Streamlit UI v2
+"""LoanAssist — Professional Chat UI (ChatGPT / Claude Architecture)
 
 Features:
-  • Streaming chat (SSE via requests stream=True)
-  • Eligibility result card with per-rule pass/fail table
-  • EMI / FOIR / LTV calculator panel
-  • Policy citations with Rule IDs and version
-  • Document checklist (loan-type-specific)
-  • "Why not eligible?" breakdown of failed rules
-  • What-if scenario simulator (sidebar sliders)
-  • Policy version comparison (Personal Loan v1 vs v2)
-  • Audit trail — view full audit record by Application ID
+  * Persistent left sidebar (always available) with brand header, product chips,
+    API status, policy versions, and persistent conversation history.
+  * Multi-turn chat persistence (saved to disk via ui/conversation_manager.py)
+    with the ability to switch between chats or start a new chat.
+  * Full-context forwarding: sends entire chat history with follow-up prompts
+    so the LLM has multi-turn memory.
+  * Token streaming with live typing cursor and clean mid-stream error recovery.
+  * Comprehensive audit logging with explicit policy and rule versions (v2, etc.).
 """
+from __future__ import annotations
+
+import datetime
 import json
 import os
+import sys
 import time
 import uuid
+from pathlib import Path
+
+# Ensure both project root and ui/ directory are in sys.path
+_UI_DIR = Path(__file__).resolve().parent
+_ROOT_DIR = _UI_DIR.parent
+for _p in [str(_ROOT_DIR), str(_UI_DIR)]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+try:
+    import ui.conversation_manager as cm
+except ImportError:
+    import conversation_manager as cm
 
 import requests
 import streamlit as st
@@ -22,9 +38,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="LoanAssist",
+    page_title="LoanAssist — Eligibility Advisor",
     page_icon="🏦",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -33,564 +48,950 @@ st.set_page_config(
 API_URL = os.getenv("API_URL", "http://localhost:8001")
 API_KEY = os.getenv("API_KEY", "local-dev-key")
 
-# ── session state ─────────────────────────────────────────────────────────────
-for key, default in [
-    ("messages",       []),
-    ("session_id",     f"ui-{uuid.uuid4().hex[:8]}"),
-    ("last_decision",  None),
-    ("last_calcs",     None),
-    ("last_citations", []),
-    ("last_profile",   {}),
-    ("last_app_id",    None),
-    ("missing_fields", []),
-]:
-    if key not in st.session_state:
-        st.session_state[key] = default
+# ── Custom CSS for ChatGPT / Claude Aesthetic ──────────────────────────────────
+st.markdown("""
+<style>
+/* ── Typography & Background ── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-# ── helpers ───────────────────────────────────────────────────────────────────
+html, body, [data-testid="stAppViewContainer"] {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #f8fafc;
+    color: #0f172a;
+}
 
-PRODUCT_LABELS = {
+/* ── Hide default Streamlit clutter ── */
+#MainMenu, footer, header { visibility: hidden; }
+[data-testid="stToolbar"] { display: none; }
+.block-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 5rem !important;
+    max-width: 860px !important;
+}
+
+/* ── Left Sidebar (Dark ChatGPT/Claude style) ── */
+[data-testid="stSidebar"] {
+    background-color: #0f172a !important;
+    border-right: 1px solid #1e293b !important;
+}
+[data-testid="stSidebar"] hr {
+    border-color: #1e293b !important;
+    margin: 0.8rem 0 !important;
+}
+[data-testid="stSidebarUserContent"] {
+    padding: 1rem 0.85rem !important;
+}
+
+.sidebar-brand-box {
+    padding: 0.4rem 0.2rem 0.8rem 0.2rem;
+}
+.sidebar-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+.sidebar-badge {
+    display: inline-block;
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border: 1px solid rgba(96, 165, 250, 0.3);
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-top: 4px;
+}
+.sidebar-status-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.76rem;
+    color: #94a3b8;
+    margin-top: 6px;
+}
+.status-dot-green {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background-color: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+}
+.status-dot-red {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background-color: #ef4444;
+}
+
+.version-strip {
+    background: #1e293b;
+    border-radius: 8px;
+    padding: 6px 10px;
+    margin: 8px 0;
+    font-size: 0.72rem;
+    color: #cbd5e1;
+    display: flex;
+    justify-content: space-between;
+    border: 1px solid #334155;
+}
+.version-tag {
+    color: #38bdf8;
+    font-weight: 600;
+}
+
+.product-pill-box {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 8px 0;
+}
+.product-pill {
+    background: #1e293b;
+    color: #94a3b8;
+    font-size: 0.73rem;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid #334155;
+}
+
+.history-section-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    margin: 1rem 0 0.5rem 0.2rem;
+}
+
+.conv-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    margin-bottom: 3px;
+    font-size: 0.83rem;
+    color: #cbd5e1;
+    background: transparent;
+    transition: background 0.15s ease;
+}
+.conv-item.active {
+    background: #1e293b;
+    color: #ffffff;
+    font-weight: 600;
+    border-left: 3px solid #3b82f6;
+}
+
+/* ── Main Chat Area ── */
+.chat-container {
+    max-width: 820px;
+    margin: 0 auto;
+    padding-bottom: 2rem;
+}
+
+/* ── Hero / Welcome Screen (Claude/ChatGPT style) ── */
+.hero-box {
+    text-align: center;
+    padding: 3.5rem 1.5rem 2rem 1.5rem;
+    margin: 0 auto 1.5rem auto;
+    max-width: 680px;
+}
+.hero-avatar {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #f8fafc;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin: 0 auto 1.2rem auto;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
+}
+.hero-title {
+    font-size: 1.85rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+}
+.hero-subtitle {
+    font-size: 0.95rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+}
+
+/* ── Starter prompt cards ── */
+.prompt-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    text-align: left;
+    transition: all 0.15s ease-in-out;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+}
+.prompt-card:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+    transform: translateY(-1px);
+}
+.prompt-title {
+    font-weight: 600;
+    font-size: 0.86rem;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+}
+.prompt-desc {
+    font-size: 0.77rem;
+    color: #64748b;
+}
+
+/* ── Messages ── */
+.msg-wrapper {
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-direction: column;
+}
+.msg-user-row {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0.5rem 0;
+}
+.msg-user-bubble {
+    background: #2563eb;
+    color: #ffffff;
+    border-radius: 18px 18px 4px 18px;
+    padding: 0.75rem 1.15rem;
+    max-width: 80%;
+    font-size: 0.92rem;
+    line-height: 1.55;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.2);
+    word-break: break-word;
+}
+
+.msg-assistant-row {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+    margin: 0.6rem 0;
+    align-items: flex-start;
+}
+.assistant-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #0f172a;
+    color: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 5px rgba(15, 23, 42, 0.15);
+}
+.msg-assistant-bubble {
+    background: #ffffff;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px 18px 18px 18px;
+    padding: 0.9rem 1.25rem;
+    max-width: 84%;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    word-break: break-word;
+}
+
+/* ── Typing Indicator ── */
+.typing-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+}
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    background-color: #94a3b8;
+    border-radius: 50%;
+    animation: typingBounce 1.2s infinite ease-in-out;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+    40% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ── Badges & Metric Chips ── */
+.decision-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.4rem 0.85rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.83rem;
+    margin: 0.6rem 0 0.4rem 0;
+}
+.badge-eligible {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+.badge-notelig {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+.badge-manual {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+.badge-info {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+.version-pill-inline {
+    background: rgba(0,0,0,0.06);
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-left: 4px;
+}
+
+.metric-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin: 0.6rem 0;
+}
+.metric-chip {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.79rem;
+    color: #475569;
+}
+.metric-chip strong { color: #0f172a; font-weight: 600; }
+
+/* ── Rule Breakdown Table ── */
+.rule-table {
+    width: 100%;
+    margin-top: 0.4rem;
+    font-size: 0.81rem;
+    border-collapse: collapse;
+}
+.rule-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+.rule-row:last-child { border-bottom: none; }
+.rule-icon { font-size: 0.9rem; width: 18px; flex-shrink: 0; }
+.rule-id-tag {
+    font-family: monospace;
+    font-size: 0.75rem;
+    background: #f1f5f9;
+    color: #4338ca;
+    padding: 1px 5px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+.rule-version-tag {
+    font-family: monospace;
+    font-size: 0.7rem;
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 1px 4px;
+    border-radius: 4px;
+    margin-left: 2px;
+}
+.rule-desc { color: #334155; flex: 1; line-height: 1.4; }
+
+/* ── Error Banner ── */
+.error-banner {
+    background: #fff1f2;
+    border: 1px solid #fecdd3;
+    color: #9f1239;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0.6rem 0;
+}
+</style>
+""", unsafe_allow_html=True)
+
+
+# ── Session State Management ──────────────────────────────────────────────────
+if "session_id" not in st.session_state:
+    st.session_state.session_id = f"conv-{uuid.uuid4().hex[:8]}"
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+if "pending_input" not in st.session_state:
+    st.session_state.pending_input = None
+
+if "last_decision" not in st.session_state:
+    st.session_state.last_decision = None
+
+if "last_calcs" not in st.session_state:
+    st.session_state.last_calcs = None
+
+if "last_citations" not in st.session_state:
+    st.session_state.last_citations = []
+
+if "last_app_id" not in st.session_state:
+    st.session_state.last_app_id = None
+
+if "api_status_cache" not in st.session_state:
+    st.session_state.api_status_cache = None
+
+
+# ── API Health & Versions ──────────────────────────────────────────────────────
+@st.cache_data(ttl=15)
+def get_api_health() -> tuple[bool, dict]:
+    try:
+        r = requests.get(f"{API_URL}/health", timeout=3)
+        if r.status_code == 200:
+            return True, r.json()
+        return False, {}
+    except Exception:
+        return False, {}
+
+
+api_healthy, health_data = get_api_health()
+active_versions = health_data.get("active_policy_versions", {
+    "personal_loan": "v2",
+    "home_loan": "v1",
+    "auto_loan": "v1",
+})
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+DECISION_CONFIG = {
+    "POTENTIALLY_ELIGIBLE":     ("✅", "badge-eligible", "Potentially Eligible"),
+    "NOT_ELIGIBLE":             ("❌", "badge-notelig",  "Not Eligible"),
+    "MANUAL_REVIEW":            ("⚠️", "badge-manual",  "Manual Review Required"),
+    "INSUFFICIENT_INFORMATION": ("ℹ️", "badge-info",    "More Information Needed"),
+}
+
+PRODUCT_DISPLAY = {
     "personal_loan": "Personal Loan",
     "home_loan":     "Home Loan",
-}
-
-DECISION_CONFIG = {
-    "POTENTIALLY_ELIGIBLE":   ("✅", "success", "Potentially Eligible"),
-    "NOT_ELIGIBLE":           ("❌", "error",   "Not Eligible"),
-    "MANUAL_REVIEW":          ("⚠️", "warning", "Manual Review Required"),
-    "INSUFFICIENT_INFORMATION": ("ℹ️", "info",  "More Information Needed"),
-    # backward compat
-    "PRE_QUALIFIED":          ("✅", "success", "Pre-Qualified"),
-    "NOT_PRE_QUALIFIED":      ("❌", "error",   "Not Pre-Qualified"),
-    "NEEDS_INFORMATION":      ("ℹ️", "info",    "More Information Needed"),
-}
-
-DOC_CHECKLISTS = {
-    "personal_loan": [
-        "Aadhaar Card (identity proof)",
-        "PAN Card (mandatory)",
-        "Last 3 months pay slips (salaried) / 2 years ITR (self-employed)",
-        "Last 6 months bank statements",
-        "Form 16 (salaried applicants)",
-        "Business registration + GST certificate (self-employed)",
-        "Address proof (utility bill / rental agreement)",
-    ],
-    "home_loan": [
-        "Aadhaar Card + PAN Card (mandatory)",
-        "Last 3 months pay slips / 2 years audited financials (self-employed)",
-        "Last 12 months bank statements (salaried) / 24 months (self-employed)",
-        "Form 16 for last 2 years",
-        "Sale agreement / allotment letter",
-        "Title deed / chain of title documents",
-        "Approved building plan",
-        "NOC from housing society / builder",
-        "Property tax receipts",
-    ],
+    "auto_loan":     "Auto Loan",
 }
 
 
-def _fmt_inr(val):
-    """Format a number as ₹ with Indian comma format."""
-    if val is None:
-        return "—"
-    return f"₹{val:,.0f}"
-
-
-def _pct(val):
-    if val is None:
-        return "—"
-    return f"{val * 100:.1f}%"
-
-
-# ── sidebar ───────────────────────────────────────────────────────────────────
-
-with st.sidebar:
-    st.title("🏦 LoanAssist")
-    st.caption("Loan pre-qualification assistant")
-    st.divider()
-
-    # ── API settings ──────────────────────────────────────────────────────────
-    with st.expander("⚙️ API Settings"):
-        api_url_input = st.text_input("API URL", API_URL)
-        API_URL = api_url_input
-
-    # ── Profile card ──────────────────────────────────────────────────────────
-    if st.session_state.last_profile:
-        profile = st.session_state.last_profile
-        st.subheader("📋 Your Profile")
-        prod = profile.get("loan_type", "")
-        if prod:
-            st.markdown(f":blue-background[🏷️ **{PRODUCT_LABELS.get(prod, prod)}**]")
-        for field, val in profile.items():
-            if field == "loan_type":
-                continue
-            label = field.replace("_", " ").title()
-            if isinstance(val, float):
-                if "income" in field or "emi" in field or "amount" in field or "value" in field or "payment" in field:
-                    val = _fmt_inr(val)
-                else:
-                    val = f"{val:.2f}"
-            st.caption(f"**{label}:** {val}")
-
-        if st.session_state.missing_fields:
-            st.warning(
-                "Still needed:\n" +
-                "\n".join(f"• {f.replace('_', ' ')}" for f in st.session_state.missing_fields)
-            )
-
-    # ── Calculator panel ──────────────────────────────────────────────────────
-    if st.session_state.last_calcs:
-        st.divider()
-        st.subheader("🧮 Calculations")
-        calcs = st.session_state.last_calcs
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Monthly EMI",     _fmt_inr(calcs.get("emi")))
-            st.metric("FOIR",            _pct(calcs.get("foir")))
-        with col2:
-            st.metric("LTV",             _pct(calcs.get("ltv")))
-            st.metric("Max Affordable",  _fmt_inr(calcs.get("max_affordable_loan")))
-        if calcs.get("total_interest"):
-            st.caption(f"Total interest: {_fmt_inr(calcs['total_interest'])}")
-
-    # ── What-if scenario simulator ────────────────────────────────────────────
-    if st.session_state.last_profile.get("loan_type"):
-        st.divider()
-        st.subheader("🔮 What-If Simulator")
-        st.caption("Adjust values and re-run the eligibility engine instantly.")
-
-        with st.form("scenario_form"):
-            col1, col2 = st.columns(2)
-            with col1:
-                new_income = st.number_input(
-                    "Monthly income (₹)",
-                    value=int(st.session_state.last_profile.get("monthly_net_income") or 0),
-                    step=5000,
-                )
-                new_credit = st.number_input(
-                    "Credit score",
-                    value=int(st.session_state.last_profile.get("credit_score") or 700),
-                    min_value=300, max_value=900, step=10,
-                )
-            with col2:
-                new_amount = st.number_input(
-                    "Loan amount (₹)",
-                    value=int(st.session_state.last_profile.get("requested_amount") or 0),
-                    step=50000,
-                )
-                new_tenure = st.number_input(
-                    "Tenure (months)",
-                    value=int(st.session_state.last_profile.get("requested_tenure_months") or 60),
-                    min_value=12, step=12,
-                )
-            run_scenario = st.form_submit_button("▶ Re-run eligibility")
-
-        if run_scenario:
-            overrides = {
-                "monthly_net_income":      float(new_income),
-                "credit_score":            int(new_credit),
-                "requested_amount":        float(new_amount),
-                "requested_tenure_months": int(new_tenure),
-            }
-            try:
-                r = requests.post(
-                    f"{API_URL}/scenario",
-                    json={"session_id": st.session_state.session_id, "overrides": overrides},
-                    headers={"X-API-Key": API_KEY},
-                    timeout=30,
-                )
-                r.raise_for_status()
-                result = r.json()
-                sc_decision = result["decision"]["decision"]
-                icon, kind, label = DECISION_CONFIG.get(sc_decision, ("?", "info", sc_decision))
-                if kind == "success":  st.success(f"{icon} Scenario result: **{label}**")
-                elif kind == "error":  st.error(f"{icon} Scenario result: **{label}**")
-                elif kind == "warning": st.warning(f"{icon} Scenario result: **{label}**")
-                else:                  st.info(f"{icon} Scenario result: **{label}**")
-
-                if result["decision"].get("failed_rules"):
-                    st.caption("Failed rules:")
-                    for r_ in result["decision"]["failed_rules"]:
-                        st.caption(f"  ✗ [{r_['rule_id']}] {r_['detail']}")
-
-                if result.get("calculations"):
-                    calcs = result["calculations"]
-                    st.caption(
-                        f"EMI: {_fmt_inr(calcs.get('emi'))}  |  "
-                        f"FOIR: {_pct(calcs.get('foir'))}  |  "
-                        f"Max loan: {_fmt_inr(calcs.get('max_affordable_loan'))}"
-                    )
-            except Exception as exc:
-                st.error(f"Scenario error: {exc}")
-
-    # ── New conversation ───────────────────────────────────────────────────────
-    st.divider()
-    if st.button("🆕 New Conversation", use_container_width=True, type="secondary"):
-        for key in ["messages", "last_decision", "last_calcs", "last_citations",
-                    "last_profile", "last_app_id", "missing_fields"]:
-            st.session_state[key] = [] if key in ("messages", "last_citations", "missing_fields") else None
-        st.session_state.session_id = f"ui-{uuid.uuid4().hex[:8]}"
-        st.rerun()
-
-    st.divider()
-    st.caption(f"Session: `{st.session_state.session_id}`")
-    st.caption(f"API: `{API_URL}`")
-
-
-# ── top banner: product switcher & status ──────────────────────────────────────
-current_prod = st.session_state.last_profile.get("loan_type") if st.session_state.last_profile else None
-prod_display = PRODUCT_LABELS.get(current_prod, "Not Selected")
-prod_icon = "🏠" if current_prod == "home_loan" else ("💳" if current_prod == "personal_loan" else "🔍")
-
-banner_c1, banner_c2, banner_c3, banner_c4 = st.columns([3.5, 2.5, 2.5, 2], vertical_alignment="center")
-
-with banner_c1:
-    st.markdown(f"**Active Mode:** {prod_icon} :blue-background[**{prod_display}**]")
-
-with banner_c2:
-    if st.button("💳 Switch to Personal Loan", use_container_width=True, key="banner_switch_pl"):
-        st.session_state.last_profile["loan_type"] = "personal_loan"
-        for pf in ["property_value", "down_payment", "property_type", "property_location", "existing_property_loan"]:
-            st.session_state.last_profile.pop(pf, None)
-        st.session_state.last_decision = None
-        st.session_state.last_calcs = None
-        st.session_state.last_citations = []
-        st.session_state["_quick_msg"] = "I want to check my eligibility for a personal loan."
-        st.rerun()
-
-with banner_c3:
-    if st.button("🏠 Switch to Home Loan", use_container_width=True, key="banner_switch_hl"):
-        st.session_state.last_profile["loan_type"] = "home_loan"
-        st.session_state.last_decision = None
-        st.session_state.last_calcs = None
-        st.session_state.last_citations = []
-        st.session_state["_quick_msg"] = "I want to check my eligibility for a home loan."
-        st.rerun()
-
-with banner_c4:
-    if st.button("🔄 New Application", use_container_width=True, key="banner_new_app"):
-        for key in ["messages", "last_decision", "last_calcs", "last_citations",
-                    "last_profile", "last_app_id", "missing_fields"]:
-            st.session_state[key] = [] if key in ("messages", "last_citations", "missing_fields") else None
-        st.session_state.session_id = f"ui-{uuid.uuid4().hex[:8]}"
-        st.rerun()
-
-st.divider()
-
-# ── main area ─────────────────────────────────────────────────────────────────
-
-col_chat, col_info = st.columns([3, 2], gap="large")
-
-with col_chat:
-    st.header("💬 Chat")
-
-    # Scrollable messages viewport — keeps chat_input fixed at the bottom!
-    chat_container = st.container(height=580)
-
-    # Chat input anchored directly at the bottom
-    quick_msg = st.session_state.pop("_quick_msg", None)
-    prompt = st.chat_input("Type your question or provide your details…") or quick_msg
-
-    with chat_container:
-        # ── Welcome screen (shown only when no messages exist) ────────────────
-        if not st.session_state.messages and not prompt:
-            st.markdown("""
-            Welcome to **LoanAssist** — your pre-qualification assistant for Personal Loans
-            and Home Loans.
-
-            I will guide you through providing the required information and give you a
-            policy-backed eligibility assessment.
-
-            > ⚠️ This is a **preliminary assessment only**. It does not constitute
-            > an offer or final approval.
-            """)
-
-            col_a, col_b = st.columns(2)
-            with col_a:
-                st.markdown("**🏠 Home Loan**")
-                if st.button("I want to check my home loan eligibility", key="welcome_hl_btn"):
-                    st.session_state["_quick_msg"] = "I want to apply for a home loan"
-                    st.rerun()
-            with col_b:
-                st.markdown("**💳 Personal Loan**")
-                if st.button("I want to check my personal loan eligibility", key="welcome_pl_btn"):
-                    st.session_state["_quick_msg"] = "I want to apply for a personal loan"
-                    st.rerun()
-
-        # ── Conversation history ──────────────────────────────────────────────
-        for msg in st.session_state.messages:
-            role = msg["role"]
-            with st.chat_message(role):
-                st.markdown(msg["content"])
-                if role == "assistant":
-                    decision = msg.get("decision")
-                    if decision:
-                        icon, kind, label = DECISION_CONFIG.get(decision, ("?", "info", decision))
-                        container = st.container()
-                        if kind == "success":    container.success(f"{icon} {label}")
-                        elif kind == "error":    container.error(f"{icon} {label}")
-                        elif kind == "warning":  container.warning(f"{icon} {label}")
-                        else:                    container.info(f"{icon} {label}")
-                    cits = msg.get("citations", [])
-                    if cits:
-                        with st.expander(f"📚 Policy sources ({len(cits)} clauses)"):
-                            for i, c in enumerate(cits, 1):
-                                st.markdown(
-                                    f"**{i}. [{c.get('rule_id', '—')}]** "
-                                    f"{c.get('doc', '')} (v{c.get('version', '?')})"
-                                )
-                                st.caption(c.get("text", "")[:250])
-
-        # ── Active streaming of current prompt inside the container ───────────
-        if prompt:
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            with st.chat_message("user"):
-                st.markdown(prompt)
-
-            with st.chat_message("assistant"):
-                placeholder     = st.empty()
-                full_text       = ""
-                decision_data   = None
-                calcs_data      = None
-                citations_list  = []
-                profile_data    = {}
-                missing_fields  = []
-                app_id          = None
-                error_shown     = False
-                start_ts        = time.perf_counter()
-
-                try:
-                    headers = {
-                        "Content-Type": "application/json",
-                        "X-API-Key":    API_KEY,
-                        "X-Session-Id": st.session_state.session_id,
-                    }
-                    body = {
-                        "session_id": st.session_state.session_id,
-                        "message":    prompt,
-                    }
-
-                    with requests.post(
-                        f"{API_URL}/chat",
-                        json=body,
-                        headers=headers,
-                        stream=True,
-                        timeout=120,
-                    ) as resp:
-                        resp.raise_for_status()
-
-                        for raw in resp.iter_lines():
-                            if not raw:
-                                continue
-                            if isinstance(raw, bytes):
-                                raw = raw.decode("utf-8")
-                            if not raw.startswith("data: "):
-                                continue
-                            try:
-                                event = json.loads(raw[6:])
-                            except json.JSONDecodeError:
-                                continue
-
-                            etype = event.get("type", "")
-
-                            if etype == "token":
-                                full_text += event.get("content", "")
-                                placeholder.markdown(full_text + "▌")
-
-                            elif etype == "profile_update":
-                                profile_data  = event.get("profile", {})
-                                missing_fields = event.get("missing_fields", [])
-
-                            elif etype == "decision":
-                                decision_data = event.get("data", {})
-
-                            elif etype == "calculations":
-                                calcs_data = event.get("data", {})
-
-                            elif etype == "citations":
-                                citations_list = event.get("sources", [])
-
-                            elif etype == "audit_ref":
-                                app_id = event.get("application_id")
-
-                            elif etype == "error":
-                                st.error(event.get("content", "An error occurred."))
-                                error_shown = True
-
-                except requests.exceptions.ConnectionError:
-                    st.error(f"Cannot connect to LoanAssist at {API_URL}.")
-                    error_shown = True
-                except requests.exceptions.Timeout:
-                    st.error("Request timed out. Please try again.")
-                    error_shown = True
-                except requests.exceptions.HTTPError as exc:
-                    status = exc.response.status_code if exc.response else "?"
-                    try:
-                        detail = exc.response.json().get("detail", exc.response.text)
-                    except Exception:
-                        detail = str(exc)
-                    st.error(f"API error {status}: {detail}")
-                    error_shown = True
-                except Exception as exc:
-                    st.error(f"Unexpected error: {exc}")
-                    error_shown = True
-
-                elapsed = time.perf_counter() - start_ts
-
-                if not error_shown:
-                    placeholder.markdown(full_text or "*(No response text)*")
-
-                    if decision_data:
-                        dec = decision_data.get("decision", "")
-                        icon, kind, label = DECISION_CONFIG.get(dec, ("?", "info", dec))
-                        if kind == "success":    st.success(f"{icon} **{label}**")
-                        elif kind == "error":    st.error(f"{icon} **{label}**")
-                        elif kind == "warning":  st.warning(f"{icon} **{label}**")
-                        else:                    st.info(f"{icon} **{label}**")
-
-                    if citations_list:
-                        with st.expander(f"📚 Policy sources ({len(citations_list)} clauses)"):
-                            for i, c in enumerate(citations_list, 1):
-                                st.markdown(
-                                    f"**{i}. [{c.get('rule_id', '—')}]** "
-                                    f"{c.get('doc', '')} (v{c.get('version', '?')})"
-                                )
-                                st.caption(c.get("text", "")[:250])
-
-                    st.caption(f"⏱ {elapsed:.1f}s" + (f" · 📋 {app_id}" if app_id else ""))
-
-                if profile_data:
-                    st.session_state.last_profile   = profile_data
-                    st.session_state.missing_fields = missing_fields
-                if decision_data:
-                    st.session_state.last_decision = decision_data
-                if calcs_data:
-                    st.session_state.last_calcs    = calcs_data
-                if citations_list:
-                    st.session_state.last_citations = citations_list
-                if app_id:
-                    st.session_state.last_app_id   = app_id
-
-                st.session_state.messages.append({
-                    "role":      "assistant",
-                    "content":   full_text,
-                    "decision":  decision_data.get("decision") if decision_data else None,
-                    "citations": citations_list,
-                })
-
-            st.rerun()
-
-
-# ── right column: decision + audit ───────────────────────────────────────────
-
-with col_info:
-    # ── Eligibility card ──────────────────────────────────────────────────────
-    if st.session_state.last_decision:
-        dec_data = st.session_state.last_decision
-        dec      = dec_data.get("decision", "")
-        icon, kind, label = DECISION_CONFIG.get(dec, ("?", "info", dec))
-
-        st.subheader("📊 Eligibility Result")
-        if kind == "success":   st.success(f"{icon} **{label}**")
-        elif kind == "error":   st.error(f"{icon} **{label}**")
-        elif kind == "warning": st.warning(f"{icon} **{label}**")
-        else:                   st.info(f"{icon} **{label}**")
-
-        prod = dec_data.get("product", "")
-        if prod:
-            st.markdown(f":blue-background[🏷️ **{PRODUCT_LABELS.get(prod, prod)}**]")
-
-        # Rule-by-rule table
-        checks = dec_data.get("rule_checks", [])
-        if checks:
-            st.markdown("**Rule Results**")
-            for check in checks:
-                result_val = check.get("result", "")
-                if result_val == "PASS":
-                    st.markdown(
-                        f"✅ `{check['rule_id']}` {check['rule_name']}"
-                    )
-                elif result_val == "FAIL":
-                    st.markdown(
-                        f"❌ `{check['rule_id']}` {check['rule_name']}"
-                    )
-                    st.caption(f"   ↳ {check['detail']}")
-                elif result_val == "MANUAL_REVIEW":
-                    st.markdown(
-                        f"⚠️ `{check['rule_id']}` {check['rule_name']}"
-                    )
-                    st.caption(f"   ↳ {check['detail']}")
-                else:
-                    st.markdown(
-                        f"⏳ `{check['rule_id']}` {check['rule_name']} — not evaluated"
-                    )
-
-        # Why not eligible section
-        failed = dec_data.get("failed_rules", [])
-        if failed:
-            st.divider()
-            st.markdown("**❓ Why am I not eligible?**")
-            for r in failed:
-                with st.expander(f"[{r['rule_id']}] {r['rule_name']}"):
-                    st.write(r["detail"])
-
-        # Missing fields
-        missing = dec_data.get("missing_fields", [])
-        if missing:
-            st.divider()
-            st.info(
-                "**Still needed:**\n" +
-                "\n".join(f"• {f.replace('_', ' ')}" for f in missing)
-            )
-
-    # ── Document checklist ────────────────────────────────────────────────────
-    loan_type = st.session_state.last_profile.get("loan_type")
-    if loan_type and loan_type in DOC_CHECKLISTS:
-        st.divider()
-        st.subheader("📁 Document Checklist")
-        st.markdown(f":blue-background[🏷️ **{PRODUCT_LABELS.get(loan_type, loan_type)}**]")
-        for doc in DOC_CHECKLISTS[loan_type]:
-            st.checkbox(doc, key=f"doc_{doc[:20]}")
-
-    # ── Policy version comparison ─────────────────────────────────────────────
-    st.divider()
-    with st.expander("📜 Policy Version Comparison (Personal Loan v1 vs v2)"):
-        st.markdown("""
-        | Criterion | Policy v1 | Policy v2 (current) |
-        |:---|:---|:---|
-        | Minimum income | ₹25,000/month | ₹22,000/month |
-        | Minimum credit score | 700 | 680 |
-        | Maximum FOIR | 50% | 55% |
-        | Maximum loan amount | ₹25,00,000 | ₹30,00,000 |
-        | Effective from | 2026-01-01 | 2026-07-01 |
-
-        *v2 was issued to extend credit access to a broader applicant base.*
-        """)
-
-    # ── Audit trail ───────────────────────────────────────────────────────────
-    st.divider()
-    st.subheader("🔍 Audit Trail")
-    audit_input = st.text_input(
-        "Application ID",
-        value=st.session_state.last_app_id or "",
-        placeholder="APP-XXXXXXXXXXXX",
+def _fmt_inr(v) -> str:
+    if v is None:
+        return "N/A"
+    try:
+        return f"₹{float(v):,.0f}"
+    except (TypeError, ValueError):
+        return str(v)
+
+
+def _decision_badge_html(decision: str, policy_ver: str | None = None) -> str:
+    icon, css_class, label = DECISION_CONFIG.get(
+        decision, ("ℹ️", "badge-info", decision)
     )
-    if st.button("🔍 View Audit Record") and audit_input:
-        try:
-            r = requests.get(
-                f"{API_URL}/audit/{audit_input}",
-                headers={"X-API-Key": API_KEY},
-                timeout=10,
-            )
-            if r.status_code == 200:
-                record = r.json()
-                st.json(record)
-            elif r.status_code == 404:
-                st.warning("Audit record not found.")
-            else:
-                st.error(f"Error {r.status_code}: {r.text}")
-        except Exception as exc:
-            st.error(f"Could not retrieve audit: {exc}")
+    ver_html = f"<span class='version-pill-inline'>{policy_ver}</span>" if policy_ver else ""
+    return f'<div class="decision-badge {css_class}">{icon} {label} {ver_html}</div>'
 
-    if st.session_state.last_app_id:
-        st.caption(f"Last application: `{st.session_state.last_app_id}`")
+
+def _metric_strip_html(calcs: dict, annual_rate: float | None = None) -> str:
+    chips = []
+    if "emi" in calcs and calcs["emi"] is not None:
+        chips.append(f"<span class='metric-chip'>EMI: <strong>{_fmt_inr(calcs['emi'])}/mo</strong></span>")
+    if "foir" in calcs and calcs["foir"] is not None:
+        chips.append(f"<span class='metric-chip'>FOIR: <strong>{calcs['foir']*100:.1f}%</strong></span>")
+    if "ltv" in calcs and calcs["ltv"] is not None:
+        chips.append(f"<span class='metric-chip'>LTV: <strong>{calcs['ltv']*100:.1f}%</strong></span>")
+    if "max_affordable_loan" in calcs and calcs["max_affordable_loan"] is not None:
+        chips.append(f"<span class='metric-chip'>Max Loan: <strong>{_fmt_inr(calcs['max_affordable_loan'])}</strong></span>")
+    if "total_interest" in calcs and calcs["total_interest"] is not None:
+        chips.append(f"<span class='metric-chip'>Interest: <strong>{_fmt_inr(calcs['total_interest'])}</strong></span>")
+    if annual_rate is not None:
+        chips.append(f"<span class='metric-chip'>Rate: <strong>{annual_rate:.1f}% p.a.</strong></span>")
+    if not chips:
+        return ""
+    return "<div class='metric-strip'>" + "".join(chips) + "</div>"
+
+
+def _rule_rows_html(rule_checks: list) -> str:
+    rows = []
+    for r in rule_checks:
+        res = r.get("result", "")
+        if res == "PASS":
+            icon = "✅"
+        elif res == "FAIL":
+            icon = "❌"
+        elif res == "MANUAL_REVIEW":
+            icon = "⚠️"
+        else:
+            icon = "⬜"
+        rid  = r.get("rule_id", "-")
+        name = r.get("rule_name", "")
+        det  = r.get("detail", "")
+        rver = r.get("rule_version", "")
+        ver_span = f"<span class='rule-version-tag'>{rver}</span>" if rver else ""
+        rows.append(
+            f"<div class='rule-row'>"
+            f"<span class='rule-icon'>{icon}</span>"
+            f"<span class='rule-id-tag'>{rid}</span>{ver_span}"
+            f"<span class='rule-desc'><strong>{name}</strong> — {det}</span>"
+            f"</div>"
+        )
+    return "<div class='rule-table'>" + "".join(rows) + "</div>"
+
+
+# ── Full-Context Streaming Sender ─────────────────────────────────────────────
+def _send_message(user_msg: str):
+    """Stream from /chat SSE, accumulate events, preserve tokens on mid-stream error."""
+    session_id = st.session_state.session_id
+
+    # Construct complete multi-turn context
+    history_payload = [
+        {"role": m["role"], "content": m["content"]}
+        for m in st.session_state.messages
+        if m.get("content")
+    ]
+
+    msg_placeholder = st.empty()
+
+    # Show animated typing indicator before first token arrives
+    msg_placeholder.markdown(
+        """
+        <div class="msg-assistant-row">
+            <div class="assistant-avatar">🏦</div>
+            <div class="msg-assistant-bubble">
+                <div class="typing-dots"><span></span><span></span><span></span></div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    full_text   = ""
+    decision    = None
+    calcs       = None
+    annual_rate = None
+    citations   = []
+    app_id      = None
+    rule_checks = []
+    error_msg   = None
+
+    try:
+        with requests.post(
+            f"{API_URL}/chat",
+            json={
+                "session_id": session_id,
+                "message": user_msg,
+                "history": history_payload,
+            },
+            headers={"X-API-Key": API_KEY, "Accept": "text/event-stream"},
+            stream=True,
+            timeout=90,
+        ) as resp:
+            resp.raise_for_status()
+
+            for raw_line in resp.iter_lines(decode_unicode=True):
+                if not raw_line or not raw_line.startswith("data: "):
+                    continue
+                try:
+                    event = json.loads(raw_line[6:])
+                except json.JSONDecodeError:
+                    continue
+
+                etype = event.get("type", "")
+
+                if etype == "token":
+                    token = event.get("content", "")
+                    full_text += token
+                    # Live streaming bubble with cursor
+                    msg_placeholder.markdown(
+                        f"""
+                        <div class="msg-assistant-row">
+                            <div class="assistant-avatar">🏦</div>
+                            <div class="msg-assistant-bubble">
+                                {full_text.replace('\n', '<br>')}▌
+                            </div>
+                        </div>
+                        """,
+                        unsafe_allow_html=True,
+                    )
+
+                elif etype == "decision":
+                    decision = event.get("data", {})
+                    rule_checks = decision.get("rule_checks", [])
+
+                elif etype == "calculations":
+                    calcs = event.get("data", {})
+                    annual_rate = event.get("annual_rate")
+
+                elif etype == "citations":
+                    citations = event.get("sources", [])
+
+                elif etype == "audit_ref":
+                    app_id = event.get("application_id")
+
+                elif etype == "error":
+                    error_msg = event.get("content", "Server error encountered.")
+
+    except requests.Timeout:
+        error_msg = "⏱️ Request timed out while streaming. The local LLM may still be generating."
+    except requests.ConnectionError:
+        error_msg = f"❌ Lost connection to API at `{API_URL}`. Please check server status."
+    except Exception as exc:
+        error_msg = f"⚠️ Unexpected stream error: {exc}"
+
+    # Update session state with decision metadata
+    st.session_state.last_decision  = decision
+    st.session_state.last_calcs     = calcs
+    st.session_state.last_citations = citations
+    st.session_state.last_app_id    = app_id
+
+    # Render final completed assistant bubble
+    final_parts = [
+        "<div class='msg-assistant-row'>",
+        "<div class='assistant-avatar'>🏦</div>",
+        "<div class='msg-assistant-bubble'>",
+        full_text.replace("\n", "<br>") if full_text else "<em>(No text generated)</em>",
+    ]
+
+    # Display error notice inline if mid-stream interruption happened
+    if error_msg:
+        final_parts.append(f"<div class='error-banner'>⚠️ {error_msg}</div>")
+
+    # Inline decision badge with active version
+    if decision and decision.get("decision"):
+        dec = decision["decision"]
+        pver = decision.get("policy_version")
+        final_parts.append(_decision_badge_html(dec, pver))
+
+    # Metric strip
+    if calcs:
+        final_parts.append(_metric_strip_html(calcs, annual_rate))
+
+    final_parts.append("</div></div>")
+    msg_placeholder.markdown("".join(final_parts), unsafe_allow_html=True)
+
+    # Save to session messages
+    meta = {}
+    if decision:
+        meta["decision"] = decision
+    if calcs:
+        meta["calcs"] = calcs
+        if annual_rate is not None:
+            meta["annual_rate"] = annual_rate
+    if citations:
+        meta["citations"] = citations
+    if app_id:
+        meta["app_id"] = app_id
+    if rule_checks:
+        meta["rule_checks"] = rule_checks
+    if error_msg:
+        meta["error"] = error_msg
+
+    st.session_state.messages.append({
+        "role":    "assistant",
+        "content": full_text,
+        "meta":    meta,
+    })
+
+    # Persist conversation to disk
+    product = decision.get("product") if decision else None
+    cm.save_conversation(
+        session_id=session_id,
+        messages=st.session_state.messages,
+        last_decision=decision,
+        last_calcs=calcs,
+        last_citations=citations,
+        last_app_id=app_id,
+        product=product,
+    )
+
+
+# ── Message Renderer (Historical / Non-Streaming) ──────────────────────────────
+def _render_message(msg: dict):
+    role    = msg.get("role", "assistant")
+    content = msg.get("content", "")
+    meta    = msg.get("meta", {})
+
+    if role == "user":
+        st.markdown(
+            f"""
+            <div class="msg-user-row">
+                <div class="msg-user-bubble">{content}</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+    else:
+        decision    = meta.get("decision", {})
+        calcs       = meta.get("calcs", {})
+        annual_rate = meta.get("annual_rate")
+        citations   = meta.get("citations", [])
+        app_id      = meta.get("app_id")
+        rule_checks = meta.get("rule_checks", [])
+        error_msg   = meta.get("error")
+
+        parts = [
+            "<div class=\"msg-assistant-row\">",
+            "<div class=\"assistant-avatar\">🏦</div>",
+            "<div class=\"msg-assistant-bubble\">",
+            content.replace("\n", "<br>"),
+        ]
+
+        if error_msg:
+            parts.append(f"<div class='error-banner'>⚠️ {error_msg}</div>")
+
+        if decision and decision.get("decision"):
+            pver = decision.get("policy_version")
+            parts.append(_decision_badge_html(decision["decision"], pver))
+
+        if calcs:
+            parts.append(_metric_strip_html(calcs, annual_rate))
+
+        parts.append("</div></div>")
+        st.markdown("".join(parts), unsafe_allow_html=True)
+
+        # Expandable rule-by-rule breakdown
+        if rule_checks:
+            with st.expander("📋 Evaluated Rules Breakdown (with Rule IDs & Versions)", expanded=False):
+                st.markdown(_rule_rows_html(rule_checks), unsafe_allow_html=True)
+
+        # Policy citations
+        if citations:
+            with st.expander(f"📄 Grounded Policy Citations ({len(citations)} clauses)", expanded=False):
+                for c in citations:
+                    rid = c.get("rule_id", "-")
+                    doc = c.get("doc", "-")
+                    ver = c.get("version", "")
+                    st.markdown(f"**`{rid}`** · `{doc}` `{ver}`")
+                    if c.get("text"):
+                        st.caption(f'"{c["text"][:280]}..."')
+
+        # Audit application reference
+        if app_id:
+            st.caption(f"🔍 Application Audit ID: `{app_id}` (logged with rule versions)")
+
+
+# ── Left Sidebar: Brand Banner, New Chat, and Persistent History ───────────────
+with st.sidebar:
+    # 1. Header Banner & Branding
+    st.markdown(
+        f"""
+        <div class="sidebar-brand-box">
+            <h1 class="sidebar-title">🏦 LoanAssist</h1>
+            <span class="sidebar-badge">v3 · RAG + Deterministic Engine</span>
+            <div class="sidebar-status-chip">
+                <span class="{'status-dot-green' if api_healthy else 'status-dot-red'}"></span>
+                <span>{'API Online & Ready' if api_healthy else 'API Disconnected'}</span>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 2. Policy Versions Strip
+    st.markdown(
+        f"""
+        <div class="version-strip">
+            <span>Personal: <strong class="version-tag">{active_versions.get('personal_loan','v2')}</strong></span>
+            <span>Home: <strong class="version-tag">{active_versions.get('home_loan','v1')}</strong></span>
+            <span>Auto: <strong class="version-tag">{active_versions.get('auto_loan','v1')}</strong></span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 3. Product Pills
+    st.markdown(
+        """
+        <div class="product-pill-box">
+            <span class="product-pill">🏠 Home Loan</span>
+            <span class="product-pill">💳 Personal Loan</span>
+            <span class="product-pill">🚗 Auto Loan</span>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 4. Primary "+ New Chat" Button
+    if st.button("＋ New Conversation", use_container_width=True, type="primary"):
+        new_sid = f"conv-{uuid.uuid4().hex[:8]}"
+        st.session_state.session_id = new_sid
+        st.session_state.messages = []
+        st.session_state.last_decision = None
+        st.session_state.last_calcs = None
+        st.session_state.last_citations = []
+        st.session_state.last_app_id = None
+        st.session_state.pending_input = None
+        st.rerun()
+
+    st.markdown("<div class='history-section-title'>Recent Chats</div>", unsafe_allow_html=True)
+
+    # 5. Conversation History List (Persistent across sessions)
+    saved_convs = cm.list_conversations()
+    current_sid = st.session_state.session_id
+
+    if not saved_convs:
+        st.caption("No saved conversations yet.")
+    else:
+        for conv in saved_convs[:15]:  # show up to 15 recent chats
+            sid = conv["session_id"]
+            title = conv.get("title", "Conversation")
+            is_active = (sid == current_sid)
+
+            col_btn, col_del = st.columns([0.84, 0.16])
+            with col_btn:
+                btn_label = f"💬 {title}" if not is_active else f"👉 {title}"
+                if st.button(
+                    btn_label,
+                    key=f"load_{sid}",
+                    use_container_width=True,
+                    help=f"Load session {sid}",
+                ):
+                    # Load conversation from disk
+                    full_conv = cm.get_conversation(sid)
+                    if full_conv:
+                        st.session_state.session_id     = sid
+                        st.session_state.messages       = full_conv.get("messages", [])
+                        st.session_state.last_decision  = full_conv.get("last_decision")
+                        st.session_state.last_calcs     = full_conv.get("last_calcs")
+                        st.session_state.last_citations = full_conv.get("last_citations", [])
+                        st.session_state.last_app_id    = full_conv.get("last_app_id")
+                        st.session_state.pending_input  = None
+                        st.rerun()
+
+            with col_del:
+                if st.button("🗑️", key=f"del_{sid}", help="Delete chat"):
+                    cm.delete_conversation(sid)
+                    if sid == current_sid:
+                        st.session_state.session_id = f"conv-{uuid.uuid4().hex[:8]}"
+                        st.session_state.messages = []
+                        st.session_state.last_decision = None
+                        st.session_state.last_calcs = None
+                        st.session_state.last_citations = []
+                        st.session_state.last_app_id = None
+                    st.rerun()
+
+    st.divider()
+
+    # 6. Sidebar Footer Disclaimer
+    st.markdown(
+        """
+        <div style="font-size:0.73rem; color:#64748b; line-height: 1.4;">
+            ⚠️ <strong>Pre-qualification only</strong><br>
+            Not a commitment to lend. All assessments are deterministic and logged for compliance audit.
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+# ── Main Chat Area: Empty State vs Message Feed ────────────────────────────────
+st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
+
+# Hero greeting if no messages yet
+if not st.session_state.messages:
+    st.markdown(
+        """
+        <div class="hero-box">
+            <div class="hero-avatar">🏦</div>
+            <h1 class="hero-title">How can I assist with your loan today?</h1>
+            <p class="hero-subtitle">
+                Instant pre-qualification across Home, Personal, and Auto loans.
+                Grounded in versioned banking policies and evaluated by deterministic financial rules.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # 4 Starter Recommendation Cards
+    starters = [
+        ("🏠", "Home Loan Pre-Check", "Check eligibility for ₹50L loan with ₹1.2L net income",
+         "I want to check my eligibility for a home loan of ₹50,00,000. My monthly net income is ₹1,20,000, age 34, salaried, 5 years employment, credit score 760, existing EMI ₹10,000, property value ₹70,00,000, down payment ₹20,00,000, apartment, 240 months tenure."),
+        ("💳", "Personal Loan Quick Assessment", "Check eligibility for ₹5L personal loan for 36 months",
+         "I want a personal loan of ₹5,00,000. Age 32, salaried, monthly income ₹75,000, 3 years at company, credit score 760, no existing EMIs, tenure 36 months."),
+        ("🚗", "Auto Loan Check", "Pre-qualify for a new car loan with ₹80K income",
+         "I need an auto loan for a new four-wheeler. On-road price is ₹12,00,000, loan amount ₹9,00,000, monthly salary ₹80,000, age 29, credit score 730, tenure 60 months, no existing EMIs."),
+        ("📋", "Required Documents Checklist", "See mandatory paperwork required for home loans",
+         "What documents do I need to prepare for a home loan application?"),
+    ]
+
+    col1, col2 = st.columns(2)
+    for i, (emoji, title, desc, prompt_text) in enumerate(starters):
+        with (col1 if i % 2 == 0 else col2):
+            if st.button(
+                f"{emoji} {title}\n\n{desc}",
+                key=f"starter_card_{i}",
+                use_container_width=True,
+            ):
+                st.session_state.pending_input = prompt_text
+
+else:
+    # Render all historical messages
+    for msg in st.session_state.messages:
+        _render_message(msg)
+
+st.markdown("</div>", unsafe_allow_html=True)
+
+
+# ── Chat Input & Action Trigger ────────────────────────────────────────────────
+user_input = st.chat_input("Ask about home, personal, or auto loan eligibility…")
+
+# If a starter card was clicked, prioritize it
+if st.session_state.pending_input:
+    user_input = st.session_state.pending_input
+    st.session_state.pending_input = None
+
+if user_input:
+    # 1. Append user prompt to messages
+    st.session_state.messages.append({"role": "user", "content": user_input})
+
+    # 2. Persist turn immediately to conversation store
+    cm.save_conversation(
+        session_id=st.session_state.session_id,
+        messages=st.session_state.messages,
+        last_decision=st.session_state.last_decision,
+        last_calcs=st.session_state.last_calcs,
+        last_citations=st.session_state.last_citations,
+        last_app_id=st.session_state.last_app_id,
+    )
+
+    # 3. Re-render prior messages + new user message
+    st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
+    for msg in st.session_state.messages[:-1]:
+        _render_message(msg)
+    _render_message(st.session_state.messages[-1])
+
+    # 4. Stream response and update state
+    _send_message(user_input)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+    st.rerun()

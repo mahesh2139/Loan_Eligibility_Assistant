@@ -155,3 +155,54 @@ tests:
         value: "POTENTIALLY_ELIGIBLE"
       - type: not-contains
         value: "NOT_ELIGIBLE"
+
+  # ── Semantic detection: "house loan" → Home Loan ──────────────────────────
+  - description: "SEM-001: 'house loan' should be treated as home loan"
+    vars:
+      question: >
+        I want a house loan. I'm 34, salaried for 3 years, earning Rs.90,000
+        per month. CIBIL score 740, no existing EMIs. Property value Rs.60 lakhs,
+        down payment Rs.15 lakhs, loan of Rs.45 lakhs for 20 years. Apartment in Bangalore.
+    assert:
+      - type: contains
+        value: "POTENTIALLY_ELIGIBLE"
+      - type: not-contains
+        value: "personal_loan"
+
+  # ── Auto Loan: fully eligible ─────────────────────────────────────────────
+  - description: "AL-001: Eligible auto loan - new car"
+    vars:
+      question: >
+        I need a car loan. I am 30 years old, salaried for 2 years,
+        monthly income Rs.60,000. CIBIL score 720, no existing EMI.
+        I want to buy a new four-wheeler with on-road price of Rs.8 lakhs.
+        I need a loan of Rs.6 lakhs for 48 months.
+    assert:
+      - type: contains
+        value: "POTENTIALLY_ELIGIBLE"
+      - type: not-contains
+        value: "NOT_ELIGIBLE"
+
+  # ── Auto Loan: LTV fail (used car) ────────────────────────────────────────
+  - description: "AL-002: Not eligible - LTV too high for used vehicle"
+    vars:
+      question: >
+        I want a used car loan. Age 35, salaried 3 years, income Rs.70,000,
+        CIBIL 750, no EMIs. Used car on-road price Rs.5 lakhs,
+        loan amount Rs.4.5 lakhs for 36 months.
+    assert:
+      - type: contains
+        value: "NOT_ELIGIBLE"
+      - type: contains
+        value: "AL-LTV-001"
+
+  # ── Auto Loan: missing vehicle info ──────────────────────────────────────
+  - description: "AL-003: Missing vehicle information - should request more info"
+    vars:
+      question: >
+        Hi, I want a scooter loan. I am 28 years old, salaried.
+    assert:
+      - type: contains
+        value: "INSUFFICIENT_INFORMATION"
+      - type: not-contains
+        value: "POTENTIALLY_ELIGIBLE"

@@ -1,0 +1,1904 @@
+{
+  "conv-6c93d3fd": {
+    "session_id": "conv-6c93d3fd",
+    "title": "I want to check my eligibility…",
+    "created_at": 1790419040.5037344,
+    "updated_at": 1790419640.2523792,
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to check my eligibility for a home loan of ₹50,00,000. My monthly net income is ₹1,20,000, age 34, salaried, 5 years employment, credit score 760, existing EMI ₹10,000, property value ₹70,00,000, down payment ₹20,00,000, apartment, 240 months tenure."
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility status for a home loan is currently classified as POTENTIALLY_ELIGIBLE. This means that while you meet several key criteria, further steps are necessary before a final decision can be made.\n\nYou successfully passed all the relevant rules, including age eligibility (age 34), minimum income (monthly income of ₹120,000), employment stability (60 months of salaried employment), credit score (760), FOIR (44.5% which is within the maximum of 55%), Loan-to-Value (LTV) ratio (71.4% which is within the maximum of 80%), property eligibility (type 'apartment'), loan amount (₹5,000,000 within policy limits), and loan tenure (240 months within the range of 12–360 months). There were no failed rules or missing fields in your application.\n\nAs your status is POTENTIALLY_ELIGIBLE, the next steps involve a thorough review of your application and supporting documentation. Please ensure that you have all required documents ready, including identity proof, income proof, and property documents as outlined in Rule ID [HL-DOC-001]. \n\nIt is important to note that this status does not guarantee final loan approval. The final decision will depend on property valuation, legal verification, and credit underwriting. Please be prepared for these additional steps to ensure a smooth process.",
+        "meta": {
+          "decision": {
+            "decision": "POTENTIALLY_ELIGIBLE",
+            "product": "home_loan",
+            "rule_checks": [
+              {
+                "rule_id": "HL-AGE-001",
+                "rule_name": "Age Eligibility",
+                "result": "PASS",
+                "detail": "Age 34 is eligible and loan closes within age limit of 70.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹120,000 meets minimum ₹40,000.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "PASS",
+                "detail": "Salaried employment 60 months meets 24-month requirement.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 760 meets minimum 700.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "PASS",
+                "detail": "FOIR 44.5% ≤ maximum 55%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "PASS",
+                "detail": "LTV 71.4% ≤ maximum 80%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-PROP-001",
+                "rule_name": "Property Eligibility",
+                "result": "PASS",
+                "detail": "Property type 'apartment' is eligible for a home loan.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount ₹5,000,000 is within policy limits.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 240 months is within 12–360 months.",
+                "rule_version": "v1"
+              }
+            ],
+            "failed_rules": [],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v1"
+          },
+          "calcs": {
+            "emi": 43391.16,
+            "foir": 0.4449,
+            "ltv": 0.7143,
+            "max_affordable_loan": 6452927.03,
+            "total_interest": 5413878.4,
+            "total_payment": 10413878.4
+          },
+          "annual_rate": 8.5,
+          "citations": [
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-LTV-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** HL-LTV-001 The Loan-to-Value ratio determines the maximum loan as a percentage of the property's assessed market value: - For loan amounts up to ₹30,00,000 (thirty lakh rupees): maximum LTV of 85% - For loan amounts above ₹30,00,000 (thirty lakh rupees): "
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-AMT-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 8. Loan Amount **Rule ID:** HL-AMT-001 The minimum home loan amount is ₹5,00,000 (five lakh rupees). The maximum home loan amount is ₹5,00,00,000 (five crore rupees). The loan amount is further capped by: - The applicable LTV ratio applied to the property's assessed value - The maximum affordable"
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-DOC-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 10. Documentation Requirements **Rule ID:** HL-DOC-001 The following documents are required for a home loan application: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Income proof: - Salaried: last 3 months "
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-INC-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 2. Minimum Income **Rule ID:** HL-INC-001 Applicants must have a minimum monthly net income of ₹40,000 (forty thousand rupees) after all statutory deductions. For joint applicants, the combined monthly net income is considered. Income below the stated threshold does not meet the minimum requireme"
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-EXC-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 11. Exceptions and Special Cases **Rule ID:** HL-EXC-001 The following cases require manual underwriting review: - Self-employed applicants with 24–35 months of business operation - Co-applicant arrangements where one co-applicant has a credit score between 680 and 699 - Properties with partial c"
+            }
+          ],
+          "app_id": "APP-DA70E73A2A95",
+          "rule_checks": [
+            {
+              "rule_id": "HL-AGE-001",
+              "rule_name": "Age Eligibility",
+              "result": "PASS",
+              "detail": "Age 34 is eligible and loan closes within age limit of 70.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹120,000 meets minimum ₹40,000.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-EMP-001",
+              "rule_name": "Employment Stability",
+              "result": "PASS",
+              "detail": "Salaried employment 60 months meets 24-month requirement.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 760 meets minimum 700.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "PASS",
+              "detail": "FOIR 44.5% ≤ maximum 55%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-LTV-001",
+              "rule_name": "Loan-to-Value (LTV)",
+              "result": "PASS",
+              "detail": "LTV 71.4% ≤ maximum 80%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-PROP-001",
+              "rule_name": "Property Eligibility",
+              "result": "PASS",
+              "detail": "Property type 'apartment' is eligible for a home loan.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount ₹5,000,000 is within policy limits.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 240 months is within 12–360 months.",
+              "rule_version": "v1"
+            }
+          ]
+        }
+      },
+      {
+        "role": "user",
+        "content": "I want to check eligibility of personal loan"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for a personal loan has resulted in a decision of NOT_ELIGIBLE. This means that, based on the current criteria, you do not meet the requirements necessary to qualify for the loan at this time.\n\nSeveral rules were evaluated in your application. You successfully met the following criteria: your age of 34 is within the allowed range [PL-AGE-001], your monthly income of ₹120,000 exceeds the minimum requirement of ₹25,000 [PL-INC-001], your employment duration of 60 months meets the 12-month requirement [PL-EMP-001], and your credit score of 760 is above the minimum threshold of 700 [PL-CRD-001]. However, you did not meet the following criteria: your FOIR (Fixed Obligation to Income Ratio) of 54.2% exceeds the maximum allowed limit of 50% [PL-FOIR-001], the requested loan amount of ₹5,000,000 is greater than the maximum permissible amount of ₹2,500,000 [PL-AMT-001], and the loan tenure of 240 months is outside the allowed range of 12 to 60 months [PL-TEN-001].\n\nTo become eligible for a personal loan, you would need to make specific changes. You could consider reducing the loan amount to within the maximum limit of ₹2,500,000, adjusting the loan tenure to fall within the 12 to 60 months range, and ensuring that your FOIR is below 50%. Addressing these issues could improve your chances of meeting the eligibility criteria in the future.",
+        "meta": {
+          "decision": {
+            "decision": "NOT_ELIGIBLE",
+            "product": "personal_loan",
+            "rule_checks": [
+              {
+                "rule_id": "PL-AGE-001",
+                "rule_name": "Age",
+                "result": "PASS",
+                "detail": "Age 34 is within the allowed range 21–60 years.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹120,000 meets minimum ₹25,000.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-EMP-001",
+                "rule_name": "Employment Duration",
+                "result": "PASS",
+                "detail": "Salaried employment 60 months meets the 12-month requirement.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 760 meets minimum 700.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 54.2% exceeds maximum 50%.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "FAIL",
+                "detail": "Amount ₹5,000,000 > maximum ₹2,500,000.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "FAIL",
+                "detail": "Tenure 240 months is outside allowed range 12–60 months.",
+                "rule_version": "v2"
+              }
+            ],
+            "failed_rules": [
+              {
+                "rule_id": "PL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 54.2% exceeds maximum 50%."
+              },
+              {
+                "rule_id": "PL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "FAIL",
+                "detail": "Amount ₹5,000,000 > maximum ₹2,500,000."
+              },
+              {
+                "rule_id": "PL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "FAIL",
+                "detail": "Tenure 240 months is outside allowed range 12–60 months."
+              }
+            ],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v2"
+          },
+          "calcs": {
+            "emi": 55054.31,
+            "foir": 0.5421,
+            "max_affordable_loan": 4540970.82,
+            "total_interest": 8213034.4,
+            "total_payment": 13213034.4
+          },
+          "annual_rate": 12.0,
+          "citations": [
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AGE-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 1. Age Eligibility **Rule ID:** PL-AGE-001 Applicants must be at least 21 years old and not older than 60 years at the time of loan application. Applicants below 21 or above 60 do not meet the age eligibility requirement. Age must be confirmed before an assessment can be completed."
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-DOC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 8. Documentation Requirements **Rule ID:** PL-DOC-001 The following documents are required for a personal loan application: - Identity proof (Aadhaar card, PAN card, passport, or driving licence) - Address proof (utility bill, rental agreement, or bank statement) - Income proof: last 3 months pay"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AMT-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 6. Loan Amount **Rule ID:** PL-AMT-001 The minimum personal loan amount is ₹50,000 (fifty thousand rupees). The maximum personal loan amount is ₹30,00,000 (thirty lakh rupees). **Change from v1:** Maximum loan amount increased from ₹25L to ₹30L. Additionally, the loan amount must not exceed 30 ti"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-EXC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 9. Exceptions and Special Cases **Rule ID:** PL-EXC-001 The following cases require manual underwriting review: - Self-employed applicants with 12–23 months of business operation - Applicants with credit scores between 650 and 679 (updated from v1) who have demonstrated strong income growth over "
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-INC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 2. Minimum Income **Rule ID:** PL-INC-001 Applicants must have a minimum monthly net income of ₹22,000 (twenty-two thousand rupees) after all statutory deductions. **Change from v1:** Minimum income reduced from ₹25,000 to ₹22,000 to extend access to personal credit for a wider applicant base. Gr"
+            }
+          ],
+          "app_id": "APP-A17101B27D20",
+          "rule_checks": [
+            {
+              "rule_id": "PL-AGE-001",
+              "rule_name": "Age",
+              "result": "PASS",
+              "detail": "Age 34 is within the allowed range 21–60 years.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹120,000 meets minimum ₹25,000.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-EMP-001",
+              "rule_name": "Employment Duration",
+              "result": "PASS",
+              "detail": "Salaried employment 60 months meets the 12-month requirement.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 760 meets minimum 700.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "FAIL",
+              "detail": "FOIR 54.2% exceeds maximum 50%.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "FAIL",
+              "detail": "Amount ₹5,000,000 > maximum ₹2,500,000.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "FAIL",
+              "detail": "Tenure 240 months is outside allowed range 12–60 months.",
+              "rule_version": "v2"
+            }
+          ]
+        }
+      },
+      {
+        "role": "user",
+        "content": "Check eligibility if i do not want to take home loan just want to take personal loan of 1000000 for 5 years"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for a personal loan has resulted in a status of POTENTIALLY_ELIGIBLE. This means that while you meet the necessary criteria, further review may be required before final approval can be granted.\n\nThe assessment shows that you successfully passed all the relevant rules. Your age of 34 is within the allowed range of 21 to 60 years as per Rule ID [PL-AGE-001]. Your monthly income of ₹120,000 exceeds the minimum requirement of ₹25,000 outlined in Rule ID [PL-INC-001]. Additionally, your employment duration of 60 months meets the 12-month requirement specified in Rule ID [PL-EMP-001]. Your credit score of 760 is above the minimum threshold of 700 as per Rule ID [PL-CRD-001]. Furthermore, your FOIR of 26.9% is well within the maximum limit of 50% according to Rule ID [PL-FOIR-001]. The loan amount of ₹1,000,000 is also within the policy limits set by Rule ID [PL-AMT-001], and your loan tenure of 60 months complies with the required range of 12 to 60 months as per Rule ID [PL-TEN-001].\n\nAs you are categorized as POTENTIALLY_ELIGIBLE, the next steps would typically involve a review of your application and supporting documentation. Please ensure that you have all necessary documents ready, such as identity proof, address proof, income proof, and bank statements, as outlined in Rule ID [PL-DOC-001]. It is important to note that this status does not guarantee final loan approval, and the lender will conduct a thorough review before making a decision.",
+        "meta": {
+          "decision": {
+            "decision": "POTENTIALLY_ELIGIBLE",
+            "product": "personal_loan",
+            "rule_checks": [
+              {
+                "rule_id": "PL-AGE-001",
+                "rule_name": "Age",
+                "result": "PASS",
+                "detail": "Age 34 is within the allowed range 21–60 years.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹120,000 meets minimum ₹25,000.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-EMP-001",
+                "rule_name": "Employment Duration",
+                "result": "PASS",
+                "detail": "Salaried employment 60 months meets the 12-month requirement.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 760 meets minimum 700.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "PASS",
+                "detail": "FOIR 26.9% is within maximum 50%.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount ₹1,000,000 is within policy limits.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 60 months is within 12–60 months.",
+                "rule_version": "v2"
+              }
+            ],
+            "failed_rules": [],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v2"
+          },
+          "calcs": {
+            "emi": 22244.45,
+            "foir": 0.2687,
+            "max_affordable_loan": 2247751.92,
+            "total_interest": 334667.0,
+            "total_payment": 1334667.0
+          },
+          "annual_rate": 12.0,
+          "citations": [
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AGE-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 1. Age Eligibility **Rule ID:** PL-AGE-001 Applicants must be at least 21 years old and not older than 60 years at the time of loan application. Applicants below 21 or above 60 do not meet the age eligibility requirement. Age must be confirmed before an assessment can be completed."
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AMT-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 6. Loan Amount **Rule ID:** PL-AMT-001 The minimum personal loan amount is ₹50,000 (fifty thousand rupees). The maximum personal loan amount is ₹30,00,000 (thirty lakh rupees). **Change from v1:** Maximum loan amount increased from ₹25L to ₹30L. Additionally, the loan amount must not exceed 30 ti"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-DOC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 8. Documentation Requirements **Rule ID:** PL-DOC-001 The following documents are required for a personal loan application: - Identity proof (Aadhaar card, PAN card, passport, or driving licence) - Address proof (utility bill, rental agreement, or bank statement) - Income proof: last 3 months pay"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-TEN-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 7. Loan Tenure **Rule ID:** PL-TEN-001 Personal loan tenure must be between 12 months and 60 months (1 to 5 years). Tenures outside this range are not eligible under this policy."
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-INC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 2. Minimum Income **Rule ID:** PL-INC-001 Applicants must have a minimum monthly net income of ₹22,000 (twenty-two thousand rupees) after all statutory deductions. **Change from v1:** Minimum income reduced from ₹25,000 to ₹22,000 to extend access to personal credit for a wider applicant base. Gr"
+            }
+          ],
+          "app_id": "APP-1C60946D2939",
+          "rule_checks": [
+            {
+              "rule_id": "PL-AGE-001",
+              "rule_name": "Age",
+              "result": "PASS",
+              "detail": "Age 34 is within the allowed range 21–60 years.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹120,000 meets minimum ₹25,000.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-EMP-001",
+              "rule_name": "Employment Duration",
+              "result": "PASS",
+              "detail": "Salaried employment 60 months meets the 12-month requirement.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 760 meets minimum 700.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "PASS",
+              "detail": "FOIR 26.9% is within maximum 50%.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount ₹1,000,000 is within policy limits.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 60 months is within 12–60 months.",
+              "rule_version": "v2"
+            }
+          ]
+        }
+      },
+      {
+        "role": "user",
+        "content": "Along with perosnal loan can i get the car loan for car price 1200000 for 3 years ?"
+      },
+      {
+        "role": "assistant",
+        "content": "To assess your eligibility for the auto loan, I need to know the total on-road price of the vehicle, which includes the ex-showroom price, taxes, and insurance. Could you please provide that information? Additionally, is the vehicle new or used?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "on-road price is 1500000 and new"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for the auto loan has resulted in a decision of NOT_ELIGIBLE. This means that, based on the current criteria, you do not meet all the necessary requirements to qualify for the loan.\n\nThe assessment showed that you passed several key eligibility rules: your age of 34 is within the allowed range (Rule ID: AL-AGE-001), your monthly income of ₹120,000 exceeds the minimum requirement of ₹20,000 (Rule ID: AL-INC-001), and your employment stability of 60 months meets the 12-month requirement (Rule ID: AL-EMP-001). Additionally, your credit score of 760 is above the minimum threshold of 680 (Rule ID: AL-CRD-001), and your FOIR of 48.1% is within the maximum limit of 50% (Rule ID: AL-FOIR-001). However, the application failed on the Loan-to-Value (LTV) ratio, where your LTV of 100.0% exceeds the maximum allowable limit of 85% for a new vehicle (Rule ID: AL-LTV-001).\n\nTo become eligible for the auto loan, you would need to reduce the LTV ratio. This can be achieved by increasing your down payment to ensure that the loan amount does not exceed 85% of the vehicle's on-road price. By doing so, you would meet the necessary criteria for the LTV ratio and potentially qualify for the loan.\n\nPlease keep in mind that this assessment does not guarantee final loan approval, and any changes made to your application would need to be re-evaluated against the eligibility criteria.",
+        "meta": {
+          "decision": {
+            "decision": "NOT_ELIGIBLE",
+            "product": "auto_loan",
+            "rule_checks": [
+              {
+                "rule_id": "AL-AGE-001",
+                "rule_name": "Age Eligibility",
+                "result": "PASS",
+                "detail": "Age 34 is within allowed range 21-65.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income Rs.120,000 meets minimum Rs.20,000.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "PASS",
+                "detail": "Salaried employment 60m meets 12m requirement.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 760 meets minimum 680.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "PASS",
+                "detail": "FOIR 48.1% is within maximum 50%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "FAIL",
+                "detail": "LTV 100.0% > maximum 85% for new vehicle.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-VEH-001",
+                "rule_name": "Vehicle Eligibility",
+                "result": "PASS",
+                "detail": "Vehicle is eligible (new).",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount Rs.1,500,000 is within policy limits.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 36m within 12-84m.",
+                "rule_version": "v1"
+              }
+            ],
+            "failed_rules": [
+              {
+                "rule_id": "AL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "FAIL",
+                "detail": "LTV 100.0% > maximum 85% for new vehicle."
+              }
+            ],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v1"
+          },
+          "calcs": {
+            "emi": 47699.6,
+            "foir": 0.4808,
+            "ltv": 1.0,
+            "max_affordable_loan": 1572340.26,
+            "total_interest": 217185.6,
+            "total_payment": 1717185.6
+          },
+          "annual_rate": 9.0,
+          "citations": [
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-AMT-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 8. Loan Amount **Rule ID:** AL-AMT-001 The minimum auto loan amount is Rs.50,000 (fifty thousand rupees). The maximum auto loan amount is Rs.50,00,000 (fifty lakh rupees). The loan amount is further limited by: - The applicable LTV ratio applied to the on-road vehicle price - The maximum affordab"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-LTV-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** AL-LTV-001 The Loan-to-Value ratio is calculated on the on-road price of the vehicle (ex-showroom price plus registration, insurance, and taxes). For new vehicles: maximum LTV of 85% of on-road price. For used/pre-owned vehicles: maximum LTV of 70% of on-"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-DOC-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 10. Documentation Requirements **Rule ID:** AL-DOC-001 The following documents are required for an auto loan application: For all applicants: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Last 6 months bank "
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-EXC-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 11. Exceptions and Manual Review Cases **Rule ID:** AL-EXC-001 The following cases are subject to manual underwriting review: - Used electric vehicles (EVs) financed for the first time - Commercial vehicle loans above Rs.20 lakh for new borrowers - Applicants with credit scores between 660 and 67"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-VEH-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 7. Vehicle Eligibility **Rule ID:** AL-VEH-001 The following vehicle types are eligible for financing: - Two-wheelers: motorcycles and scooters (new and used) - Four-wheelers: passenger cars, SUVs, MUVs (new and used) - Commercial vehicles: trucks, buses, vans used for business (new only) - Elect"
+            }
+          ],
+          "app_id": "APP-20F09FB93634",
+          "rule_checks": [
+            {
+              "rule_id": "AL-AGE-001",
+              "rule_name": "Age Eligibility",
+              "result": "PASS",
+              "detail": "Age 34 is within allowed range 21-65.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income Rs.120,000 meets minimum Rs.20,000.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-EMP-001",
+              "rule_name": "Employment Stability",
+              "result": "PASS",
+              "detail": "Salaried employment 60m meets 12m requirement.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 760 meets minimum 680.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "PASS",
+              "detail": "FOIR 48.1% is within maximum 50%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-LTV-001",
+              "rule_name": "Loan-to-Value (LTV)",
+              "result": "FAIL",
+              "detail": "LTV 100.0% > maximum 85% for new vehicle.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-VEH-001",
+              "rule_name": "Vehicle Eligibility",
+              "result": "PASS",
+              "detail": "Vehicle is eligible (new).",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount Rs.1,500,000 is within policy limits.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 36m within 12-84m.",
+              "rule_version": "v1"
+            }
+          ]
+        }
+      },
+      {
+        "role": "user",
+        "content": "check if I need car loan of 1000000 "
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility status for the auto loan is classified as POTENTIALLY_ELIGIBLE. This means that while you meet the necessary criteria, further steps may be required before final approval.\n\nThe rules that you passed include age eligibility (34 years, within the range of 21-65), minimum income (monthly income of ₹120,000, exceeding the minimum requirement of ₹20,000), employment stability (60 months of salaried employment, surpassing the 12-month requirement), and a credit score of 760, which is above the minimum of 680. Additionally, your Fixed Obligation to Income Ratio (FOIR) is 34.8%, well within the maximum limit of 50%. Your Loan-to-Value (LTV) ratio is 66.7%, which is acceptable as it is below the 85% limit for new vehicles. The loan amount of ₹1,000,000 is also within policy limits, and the loan tenure of 36 months is acceptable.\n\nSince you are classified as POTENTIALLY_ELIGIBLE, the next steps would typically involve submitting the required documentation for the loan application. This includes identity proof, address proof, bank statements, and employment verification documents. Please note that this status does not guarantee final loan approval, as the application will still undergo further review.\n\nIf you have any questions or need assistance with the documentation process, feel free to ask.",
+        "meta": {
+          "decision": {
+            "decision": "POTENTIALLY_ELIGIBLE",
+            "product": "auto_loan",
+            "rule_checks": [
+              {
+                "rule_id": "AL-AGE-001",
+                "rule_name": "Age Eligibility",
+                "result": "PASS",
+                "detail": "Age 34 is within allowed range 21-65.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income Rs.120,000 meets minimum Rs.20,000.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "PASS",
+                "detail": "Salaried employment 60m meets 12m requirement.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 760 meets minimum 680.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "PASS",
+                "detail": "FOIR 34.8% is within maximum 50%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "PASS",
+                "detail": "LTV 66.7% is within 85% limit for new vehicle.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-VEH-001",
+                "rule_name": "Vehicle Eligibility",
+                "result": "PASS",
+                "detail": "Vehicle is eligible (new).",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount Rs.1,000,000 is within policy limits.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "AL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 36m within 12-84m.",
+                "rule_version": "v1"
+              }
+            ],
+            "failed_rules": [],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v1"
+          },
+          "calcs": {
+            "emi": 31799.73,
+            "foir": 0.3483,
+            "ltv": 0.6667,
+            "max_affordable_loan": 1572340.26,
+            "total_interest": 144790.28,
+            "total_payment": 1144790.28
+          },
+          "annual_rate": 9.0,
+          "citations": [
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-AMT-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 8. Loan Amount **Rule ID:** AL-AMT-001 The minimum auto loan amount is Rs.50,000 (fifty thousand rupees). The maximum auto loan amount is Rs.50,00,000 (fifty lakh rupees). The loan amount is further limited by: - The applicable LTV ratio applied to the on-road vehicle price - The maximum affordab"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-DOC-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 10. Documentation Requirements **Rule ID:** AL-DOC-001 The following documents are required for an auto loan application: For all applicants: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Last 6 months bank "
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-LTV-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** AL-LTV-001 The Loan-to-Value ratio is calculated on the on-road price of the vehicle (ex-showroom price plus registration, insurance, and taxes). For new vehicles: maximum LTV of 85% of on-road price. For used/pre-owned vehicles: maximum LTV of 70% of on-"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-EXC-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 11. Exceptions and Manual Review Cases **Rule ID:** AL-EXC-001 The following cases are subject to manual underwriting review: - Used electric vehicles (EVs) financed for the first time - Commercial vehicle loans above Rs.20 lakh for new borrowers - Applicants with credit scores between 660 and 67"
+            },
+            {
+              "doc": "auto_loan_v1.md",
+              "rule_id": "AL-FOIR-001",
+              "version": "v1",
+              "policy_id": "LPQ-AL-2026-01",
+              "text": "## 5. Fixed Obligation to Income Ratio (FOIR) **Rule ID:** AL-FOIR-001 The Fixed Obligation to Income Ratio (FOIR) including the proposed auto loan EMI must not exceed 50% of monthly net income. FOIR = (Existing Monthly EMIs + Proposed Auto Loan EMI) / Monthly Net Income <= 0.50 Applicants with FOIR"
+            }
+          ],
+          "app_id": "APP-BD13830F6F9A",
+          "rule_checks": [
+            {
+              "rule_id": "AL-AGE-001",
+              "rule_name": "Age Eligibility",
+              "result": "PASS",
+              "detail": "Age 34 is within allowed range 21-65.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income Rs.120,000 meets minimum Rs.20,000.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-EMP-001",
+              "rule_name": "Employment Stability",
+              "result": "PASS",
+              "detail": "Salaried employment 60m meets 12m requirement.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 760 meets minimum 680.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "PASS",
+              "detail": "FOIR 34.8% is within maximum 50%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-LTV-001",
+              "rule_name": "Loan-to-Value (LTV)",
+              "result": "PASS",
+              "detail": "LTV 66.7% is within 85% limit for new vehicle.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-VEH-001",
+              "rule_name": "Vehicle Eligibility",
+              "result": "PASS",
+              "detail": "Vehicle is eligible (new).",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount Rs.1,000,000 is within policy limits.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "AL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 36m within 12-84m.",
+              "rule_version": "v1"
+            }
+          ]
+        }
+      }
+    ],
+    "last_decision": {
+      "decision": "POTENTIALLY_ELIGIBLE",
+      "product": "auto_loan",
+      "rule_checks": [
+        {
+          "rule_id": "AL-AGE-001",
+          "rule_name": "Age Eligibility",
+          "result": "PASS",
+          "detail": "Age 34 is within allowed range 21-65.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-INC-001",
+          "rule_name": "Minimum Income",
+          "result": "PASS",
+          "detail": "Monthly income Rs.120,000 meets minimum Rs.20,000.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-EMP-001",
+          "rule_name": "Employment Stability",
+          "result": "PASS",
+          "detail": "Salaried employment 60m meets 12m requirement.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-CRD-001",
+          "rule_name": "Credit Score",
+          "result": "PASS",
+          "detail": "Credit score 760 meets minimum 680.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "PASS",
+          "detail": "FOIR 34.8% is within maximum 50%.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-LTV-001",
+          "rule_name": "Loan-to-Value (LTV)",
+          "result": "PASS",
+          "detail": "LTV 66.7% is within 85% limit for new vehicle.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-VEH-001",
+          "rule_name": "Vehicle Eligibility",
+          "result": "PASS",
+          "detail": "Vehicle is eligible (new).",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-AMT-001",
+          "rule_name": "Loan Amount",
+          "result": "PASS",
+          "detail": "Amount Rs.1,000,000 is within policy limits.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "AL-TEN-001",
+          "rule_name": "Loan Tenure",
+          "result": "PASS",
+          "detail": "Tenure 36m within 12-84m.",
+          "rule_version": "v1"
+        }
+      ],
+      "failed_rules": [],
+      "manual_review_rules": [],
+      "missing_fields": [],
+      "policy_version": "v1"
+    },
+    "last_calcs": {
+      "emi": 31799.73,
+      "foir": 0.3483,
+      "ltv": 0.6667,
+      "max_affordable_loan": 1572340.26,
+      "total_interest": 144790.28,
+      "total_payment": 1144790.28
+    },
+    "last_citations": [
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-AMT-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 8. Loan Amount **Rule ID:** AL-AMT-001 The minimum auto loan amount is Rs.50,000 (fifty thousand rupees). The maximum auto loan amount is Rs.50,00,000 (fifty lakh rupees). The loan amount is further limited by: - The applicable LTV ratio applied to the on-road vehicle price - The maximum affordab"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-DOC-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 10. Documentation Requirements **Rule ID:** AL-DOC-001 The following documents are required for an auto loan application: For all applicants: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Last 6 months bank "
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-LTV-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** AL-LTV-001 The Loan-to-Value ratio is calculated on the on-road price of the vehicle (ex-showroom price plus registration, insurance, and taxes). For new vehicles: maximum LTV of 85% of on-road price. For used/pre-owned vehicles: maximum LTV of 70% of on-"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-EXC-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 11. Exceptions and Manual Review Cases **Rule ID:** AL-EXC-001 The following cases are subject to manual underwriting review: - Used electric vehicles (EVs) financed for the first time - Commercial vehicle loans above Rs.20 lakh for new borrowers - Applicants with credit scores between 660 and 67"
+      },
+      {
+        "doc": "auto_loan_v1.md",
+        "rule_id": "AL-FOIR-001",
+        "version": "v1",
+        "policy_id": "LPQ-AL-2026-01",
+        "text": "## 5. Fixed Obligation to Income Ratio (FOIR) **Rule ID:** AL-FOIR-001 The Fixed Obligation to Income Ratio (FOIR) including the proposed auto loan EMI must not exceed 50% of monthly net income. FOIR = (Existing Monthly EMIs + Proposed Auto Loan EMI) / Monthly Net Income <= 0.50 Applicants with FOIR"
+      }
+    ],
+    "last_app_id": "APP-BD13830F6F9A",
+    "product": "auto_loan"
+  },
+  "conv-288e1d73": {
+    "session_id": "conv-288e1d73",
+    "title": "What documents do I need to…",
+    "created_at": 1790419654.4956758,
+    "updated_at": 1790419687.255653,
+    "messages": [
+      {
+        "role": "user",
+        "content": "What documents do I need to prepare for a home loan application?"
+      },
+      {
+        "role": "assistant",
+        "content": "To apply for a home loan, you will need to prepare the following documents:\n\n**Documents required for Home Loan:**\n- **Identity proof:** Aadhaar card + PAN card (mandatory)\n- **Address proof:** Utility bill, bank statement, or rental agreement\n- **Income proof:** Last 3 months pay slips / last 2 years audited financials\n- **Bank statements:** Last 12 months bank statements (for salaried applicants) / 24 months (for self-employed applicants)\n- **Form 16:** For the last 2 years (salaried applicants)\n- **Property documents:** Sale agreement or allotment letter\n- **Title documents:** Title deed and chain of title documents\n- **Building approvals:** Approved building plan and NOC from builder or housing society\n- **Tax receipts:** Property tax receipts (latest)\n\nMake sure to gather all these documents to ensure a smooth application process. If you have any further questions, feel free to ask!",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "what are documents required for car loan"
+      },
+      {
+        "role": "assistant",
+        "content": "For a car loan application, you will typically need to provide the following documents:\n\n**Documents required for Car Loan:**\n- **Identity proof:** Aadhaar card, PAN card, or passport\n- **Address proof:** Utility bill, bank statement, or rental agreement\n- **Income proof:** Last 3 months pay slips / last 2 years audited financials (for self-employed)\n- **Bank statements:** Last 6 months bank statements\n- **Form 16:** For the last 2 years (salaried applicants)\n- **Vehicle documents:** Proforma invoice or quotation from the dealer\n- **Registration documents:** Copy of the vehicle registration certificate (RC)\n- **Insurance documents:** Copy of the vehicle insurance policy\n\nMake sure to check with your lender, as specific requirements may vary. If you have any more questions or need further assistance, feel free to ask!",
+        "meta": {}
+      }
+    ],
+    "last_decision": null,
+    "last_calcs": null,
+    "last_citations": [],
+    "last_app_id": null,
+    "product": null
+  },
+  "conv-24899788": {
+    "session_id": "conv-24899788",
+    "title": "I want a personal loan of…",
+    "created_at": 1790419722.5508316,
+    "updated_at": 1790419882.3467247,
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a personal loan of ₹5,00,000. Age 32, salaried, monthly income ₹75,000, 3 years at company, credit score 760, no existing EMIs, tenure 36 months."
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for a personal loan has been determined as POTENTIALLY_ELIGIBLE. This means that while you meet the necessary criteria, further steps may be required before final approval can be granted.\n\nThe assessment shows that you successfully passed all the relevant rules. Specifically, your age of 32 is within the allowed range of 21 to 60 years (Rule ID: PL-AGE-001). Your monthly income of ₹75,000 exceeds the minimum requirement of ₹25,000 (Rule ID: PL-INC-001). You have been employed for 36 months, which meets the 12-month employment duration requirement (Rule ID: PL-EMP-001). Your credit score of 760 is above the minimum threshold of 700 (Rule ID: PL-CRD-001). Additionally, your FOIR of 22.1% is well within the maximum limit of 50% (Rule ID: PL-FOIR-001). The loan amount of ₹500,000 is also compliant with policy limits (Rule ID: PL-AMT-001), and the tenure of 36 months falls within the acceptable range of 12 to 60 months (Rule ID: PL-TEN-001).\n\nAs you are classified as POTENTIALLY_ELIGIBLE, the next steps involve submitting the required documentation to proceed with your application. Please ensure that you provide identity proof, address proof, income proof (last 3 months pay slips), bank statements for the last 6 months, and Form 16. It is important to note that this status does not guarantee final loan approval, as the application will still undergo further review.",
+        "meta": {
+          "decision": {
+            "decision": "POTENTIALLY_ELIGIBLE",
+            "product": "personal_loan",
+            "rule_checks": [
+              {
+                "rule_id": "PL-AGE-001",
+                "rule_name": "Age",
+                "result": "PASS",
+                "detail": "Age 32 is within the allowed range 21–60 years.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹75,000 meets minimum ₹25,000.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-EMP-001",
+                "rule_name": "Employment Duration",
+                "result": "PASS",
+                "detail": "Salaried employment 36 months meets the 12-month requirement.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 760 meets minimum 700.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "PASS",
+                "detail": "FOIR 22.1% is within maximum 50%.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount ₹500,000 is within policy limits.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 36 months is within 12–60 months.",
+                "rule_version": "v2"
+              }
+            ],
+            "failed_rules": [],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v2"
+          },
+          "calcs": {
+            "emi": 16607.15,
+            "foir": 0.2214,
+            "max_affordable_loan": 1129031.44,
+            "total_interest": 97857.4,
+            "total_payment": 597857.4
+          },
+          "annual_rate": 12.0,
+          "citations": [
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AMT-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 6. Loan Amount **Rule ID:** PL-AMT-001 The minimum personal loan amount is ₹50,000 (fifty thousand rupees). The maximum personal loan amount is ₹30,00,000 (thirty lakh rupees). **Change from v1:** Maximum loan amount increased from ₹25L to ₹30L. Additionally, the loan amount must not exceed 30 ti"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-DOC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 8. Documentation Requirements **Rule ID:** PL-DOC-001 The following documents are required for a personal loan application: - Identity proof (Aadhaar card, PAN card, passport, or driving licence) - Address proof (utility bill, rental agreement, or bank statement) - Income proof: last 3 months pay"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-INC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 2. Minimum Income **Rule ID:** PL-INC-001 Applicants must have a minimum monthly net income of ₹22,000 (twenty-two thousand rupees) after all statutory deductions. **Change from v1:** Minimum income reduced from ₹25,000 to ₹22,000 to extend access to personal credit for a wider applicant base. Gr"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AGE-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 1. Age Eligibility **Rule ID:** PL-AGE-001 Applicants must be at least 21 years old and not older than 60 years at the time of loan application. Applicants below 21 or above 60 do not meet the age eligibility requirement. Age must be confirmed before an assessment can be completed."
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-TEN-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 7. Loan Tenure **Rule ID:** PL-TEN-001 Personal loan tenure must be between 12 months and 60 months (1 to 5 years). Tenures outside this range are not eligible under this policy."
+            }
+          ],
+          "app_id": "APP-6DA6A0B8C22A",
+          "rule_checks": [
+            {
+              "rule_id": "PL-AGE-001",
+              "rule_name": "Age",
+              "result": "PASS",
+              "detail": "Age 32 is within the allowed range 21–60 years.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹75,000 meets minimum ₹25,000.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-EMP-001",
+              "rule_name": "Employment Duration",
+              "result": "PASS",
+              "detail": "Salaried employment 36 months meets the 12-month requirement.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 760 meets minimum 700.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "PASS",
+              "detail": "FOIR 22.1% is within maximum 50%.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount ₹500,000 is within policy limits.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 36 months is within 12–60 months.",
+              "rule_version": "v2"
+            }
+          ]
+        }
+      },
+      {
+        "role": "user",
+        "content": "check if my monthly income is 25000"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for a personal loan has resulted in a status of POTENTIALLY_ELIGIBLE. This means that while you meet all the necessary criteria, further steps may be required before final approval can be granted.\n\nThe assessment shows that you successfully passed all the relevant rules. Specifically, your age of 32 is within the allowed range of 21 to 60 years (Rule ID: PL-AGE-001). Your monthly income of ₹75,000 exceeds the minimum requirement of ₹25,000 (Rule ID: PL-INC-001). You have been employed for 36 months, which meets the 12-month employment duration requirement (Rule ID: PL-EMP-001). Your credit score of 760 is above the minimum threshold of 700 (Rule ID: PL-CRD-001). Additionally, your Fixed Obligation to Income Ratio (FOIR) of 22.1% is well within the maximum limit of 50% (Rule ID: PL-FOIR-001). The loan amount of ₹500,000 is also within the policy limits (Rule ID: PL-AMT-001), and the tenure of 36 months falls within the acceptable range of 12 to 60 months (Rule ID: PL-TEN-001).\n\nAs you are categorized as POTENTIALLY_ELIGIBLE, the next steps involve submitting the required documentation to proceed with your application. This includes identity proof, address proof, income proof (last 3 months pay slips), bank statements for the last 6 months, and Form 16. Please note that this status does not guarantee final loan approval, as the application will still undergo further review.",
+        "meta": {
+          "decision": {
+            "decision": "POTENTIALLY_ELIGIBLE",
+            "product": "personal_loan",
+            "rule_checks": [
+              {
+                "rule_id": "PL-AGE-001",
+                "rule_name": "Age",
+                "result": "PASS",
+                "detail": "Age 32 is within the allowed range 21–60 years.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹75,000 meets minimum ₹25,000.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-EMP-001",
+                "rule_name": "Employment Duration",
+                "result": "PASS",
+                "detail": "Salaried employment 36 months meets the 12-month requirement.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 760 meets minimum 700.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "PASS",
+                "detail": "FOIR 22.1% is within maximum 50%.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount ₹500,000 is within policy limits.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 36 months is within 12–60 months.",
+                "rule_version": "v2"
+              }
+            ],
+            "failed_rules": [],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v2"
+          },
+          "calcs": {
+            "emi": 16607.15,
+            "foir": 0.2214,
+            "max_affordable_loan": 1129031.44,
+            "total_interest": 97857.4,
+            "total_payment": 597857.4
+          },
+          "annual_rate": 12.0,
+          "citations": [
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AMT-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 6. Loan Amount **Rule ID:** PL-AMT-001 The minimum personal loan amount is ₹50,000 (fifty thousand rupees). The maximum personal loan amount is ₹30,00,000 (thirty lakh rupees). **Change from v1:** Maximum loan amount increased from ₹25L to ₹30L. Additionally, the loan amount must not exceed 30 ti"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-DOC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 8. Documentation Requirements **Rule ID:** PL-DOC-001 The following documents are required for a personal loan application: - Identity proof (Aadhaar card, PAN card, passport, or driving licence) - Address proof (utility bill, rental agreement, or bank statement) - Income proof: last 3 months pay"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-FOIR-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 5. Fixed Obligation to Income Ratio (FOIR) **Rule ID:** PL-FOIR-001 The Fixed Obligation to Income Ratio (FOIR) must not exceed 55%. **Change from v1:** Maximum FOIR increased from 50% to 55%. FOIR = (Existing Monthly EMIs + Proposed New EMI) ÷ Monthly Net Income ≤ 0.55 An applicant whose FOIR ex"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AGE-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 1. Age Eligibility **Rule ID:** PL-AGE-001 Applicants must be at least 21 years old and not older than 60 years at the time of loan application. Applicants below 21 or above 60 do not meet the age eligibility requirement. Age must be confirmed before an assessment can be completed."
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-INC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 2. Minimum Income **Rule ID:** PL-INC-001 Applicants must have a minimum monthly net income of ₹22,000 (twenty-two thousand rupees) after all statutory deductions. **Change from v1:** Minimum income reduced from ₹25,000 to ₹22,000 to extend access to personal credit for a wider applicant base. Gr"
+            }
+          ],
+          "app_id": "APP-D30EC997FF3B",
+          "rule_checks": [
+            {
+              "rule_id": "PL-AGE-001",
+              "rule_name": "Age",
+              "result": "PASS",
+              "detail": "Age 32 is within the allowed range 21–60 years.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹75,000 meets minimum ₹25,000.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-EMP-001",
+              "rule_name": "Employment Duration",
+              "result": "PASS",
+              "detail": "Salaried employment 36 months meets the 12-month requirement.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 760 meets minimum 700.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "PASS",
+              "detail": "FOIR 22.1% is within maximum 50%.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount ₹500,000 is within policy limits.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 36 months is within 12–60 months.",
+              "rule_version": "v2"
+            }
+          ]
+        }
+      },
+      {
+        "role": "user",
+        "content": "check if i want to take loan for 800000 with 25000 salary"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for a personal loan has resulted in a status of POTENTIALLY_ELIGIBLE. This means that while you meet all the necessary criteria, further steps may be required before final approval can be granted.\n\nThe assessment shows that you successfully passed all the relevant rules. Specifically, your age of 32 is within the allowed range of 21 to 60 years (Rule ID: PL-AGE-001). Your monthly income of ₹75,000 exceeds the minimum requirement of ₹25,000 (Rule ID: PL-INC-001). You have been employed for 36 months, which meets the 12-month employment duration requirement (Rule ID: PL-EMP-001). Your credit score of 760 is above the minimum threshold of 700 (Rule ID: PL-CRD-001). Additionally, your Fixed Obligation to Income Ratio (FOIR) is 22.1%, well within the maximum limit of 50% (Rule ID: PL-FOIR-001). The loan amount of ₹500,000 you are seeking is also within the policy limits (Rule ID: PL-AMT-001), and the tenure of 36 months is acceptable (Rule ID: PL-TEN-001).\n\nAs you are categorized as POTENTIALLY_ELIGIBLE, the next steps would typically involve submitting the required documentation to support your application. This includes identity proof, address proof, income proof (last 3 months pay slips), bank statements for the last 6 months, and Form 16. Please note that this status does not guarantee final loan approval, as the lender will need to review your application and documentation further.",
+        "meta": {
+          "decision": {
+            "decision": "POTENTIALLY_ELIGIBLE",
+            "product": "personal_loan",
+            "rule_checks": [
+              {
+                "rule_id": "PL-AGE-001",
+                "rule_name": "Age",
+                "result": "PASS",
+                "detail": "Age 32 is within the allowed range 21–60 years.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹75,000 meets minimum ₹25,000.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-EMP-001",
+                "rule_name": "Employment Duration",
+                "result": "PASS",
+                "detail": "Salaried employment 36 months meets the 12-month requirement.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 760 meets minimum 700.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "PASS",
+                "detail": "FOIR 22.1% is within maximum 50%.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount ₹500,000 is within policy limits.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 36 months is within 12–60 months.",
+                "rule_version": "v2"
+              }
+            ],
+            "failed_rules": [],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v2"
+          },
+          "calcs": {
+            "emi": 16607.15,
+            "foir": 0.2214,
+            "max_affordable_loan": 1129031.44,
+            "total_interest": 97857.4,
+            "total_payment": 597857.4
+          },
+          "annual_rate": 12.0,
+          "citations": [
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AMT-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 6. Loan Amount **Rule ID:** PL-AMT-001 The minimum personal loan amount is ₹50,000 (fifty thousand rupees). The maximum personal loan amount is ₹30,00,000 (thirty lakh rupees). **Change from v1:** Maximum loan amount increased from ₹25L to ₹30L. Additionally, the loan amount must not exceed 30 ti"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-DOC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 8. Documentation Requirements **Rule ID:** PL-DOC-001 The following documents are required for a personal loan application: - Identity proof (Aadhaar card, PAN card, passport, or driving licence) - Address proof (utility bill, rental agreement, or bank statement) - Income proof: last 3 months pay"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AGE-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 1. Age Eligibility **Rule ID:** PL-AGE-001 Applicants must be at least 21 years old and not older than 60 years at the time of loan application. Applicants below 21 or above 60 do not meet the age eligibility requirement. Age must be confirmed before an assessment can be completed."
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-FOIR-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 5. Fixed Obligation to Income Ratio (FOIR) **Rule ID:** PL-FOIR-001 The Fixed Obligation to Income Ratio (FOIR) must not exceed 55%. **Change from v1:** Maximum FOIR increased from 50% to 55%. FOIR = (Existing Monthly EMIs + Proposed New EMI) ÷ Monthly Net Income ≤ 0.55 An applicant whose FOIR ex"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-INC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 2. Minimum Income **Rule ID:** PL-INC-001 Applicants must have a minimum monthly net income of ₹22,000 (twenty-two thousand rupees) after all statutory deductions. **Change from v1:** Minimum income reduced from ₹25,000 to ₹22,000 to extend access to personal credit for a wider applicant base. Gr"
+            }
+          ],
+          "app_id": "APP-1C39C3A81930",
+          "rule_checks": [
+            {
+              "rule_id": "PL-AGE-001",
+              "rule_name": "Age",
+              "result": "PASS",
+              "detail": "Age 32 is within the allowed range 21–60 years.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹75,000 meets minimum ₹25,000.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-EMP-001",
+              "rule_name": "Employment Duration",
+              "result": "PASS",
+              "detail": "Salaried employment 36 months meets the 12-month requirement.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 760 meets minimum 700.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "PASS",
+              "detail": "FOIR 22.1% is within maximum 50%.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount ₹500,000 is within policy limits.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 36 months is within 12–60 months.",
+              "rule_version": "v2"
+            }
+          ]
+        }
+      },
+      {
+        "role": "user",
+        "content": "consider my monthly salary of 25000 instead of 75000"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for a personal loan has resulted in a decision of NOT_ELIGIBLE. This means that, based on the current criteria, you do not meet the requirements necessary to qualify for the loan.\n\nSeveral rules were evaluated in your application. The following criteria passed: your age of 32 years is within the allowed range (Rule ID: PL-AGE-001), your monthly income of ₹25,000 meets the minimum requirement (Rule ID: PL-INC-001), your employment duration of 36 months exceeds the 12-month requirement (Rule ID: PL-EMP-001), your credit score of 760 is above the minimum threshold (Rule ID: PL-CRD-001), the loan amount of ₹500,000 is within policy limits (Rule ID: PL-AMT-001), and the loan tenure of 36 months is acceptable (Rule ID: PL-TEN-001). However, your Fixed Obligation to Income Ratio (FOIR) of 66.4% exceeds the maximum allowable limit of 55% (Rule ID: PL-FOIR-001), which is the reason for your ineligibility.\n\nTo become eligible for a personal loan, you would need to reduce your FOIR to 55% or below. This could be achieved by either lowering your existing monthly obligations or increasing your monthly income. \n\nPlease note that this assessment does not guarantee final loan approval, and any changes to your financial situation should be carefully considered. If you have further questions or need assistance in understanding your options, feel free to reach out.",
+        "meta": {
+          "decision": {
+            "decision": "NOT_ELIGIBLE",
+            "product": "personal_loan",
+            "rule_checks": [
+              {
+                "rule_id": "PL-AGE-001",
+                "rule_name": "Age",
+                "result": "PASS",
+                "detail": "Age 32 is within the allowed range 21–60 years.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹25,000 meets minimum ₹25,000.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-EMP-001",
+                "rule_name": "Employment Duration",
+                "result": "PASS",
+                "detail": "Salaried employment 36 months meets the 12-month requirement.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 760 meets minimum 700.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 66.4% exceeds maximum 50%.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "PASS",
+                "detail": "Amount ₹500,000 is within policy limits.",
+                "rule_version": "v2"
+              },
+              {
+                "rule_id": "PL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 36 months is within 12–60 months.",
+                "rule_version": "v2"
+              }
+            ],
+            "failed_rules": [
+              {
+                "rule_id": "PL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 66.4% exceeds maximum 50%."
+              }
+            ],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "policy_version": "v2"
+          },
+          "calcs": {
+            "emi": 16607.15,
+            "foir": 0.6643,
+            "max_affordable_loan": 376343.81,
+            "total_interest": 97857.4,
+            "total_payment": 597857.4
+          },
+          "annual_rate": 12.0,
+          "citations": [
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-AMT-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 6. Loan Amount **Rule ID:** PL-AMT-001 The minimum personal loan amount is ₹50,000 (fifty thousand rupees). The maximum personal loan amount is ₹30,00,000 (thirty lakh rupees). **Change from v1:** Maximum loan amount increased from ₹25L to ₹30L. Additionally, the loan amount must not exceed 30 ti"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-FOIR-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 5. Fixed Obligation to Income Ratio (FOIR) **Rule ID:** PL-FOIR-001 The Fixed Obligation to Income Ratio (FOIR) must not exceed 55%. **Change from v1:** Maximum FOIR increased from 50% to 55%. FOIR = (Existing Monthly EMIs + Proposed New EMI) ÷ Monthly Net Income ≤ 0.55 An applicant whose FOIR ex"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-INC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 2. Minimum Income **Rule ID:** PL-INC-001 Applicants must have a minimum monthly net income of ₹22,000 (twenty-two thousand rupees) after all statutory deductions. **Change from v1:** Minimum income reduced from ₹25,000 to ₹22,000 to extend access to personal credit for a wider applicant base. Gr"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-DOC-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 8. Documentation Requirements **Rule ID:** PL-DOC-001 The following documents are required for a personal loan application: - Identity proof (Aadhaar card, PAN card, passport, or driving licence) - Address proof (utility bill, rental agreement, or bank statement) - Income proof: last 3 months pay"
+            },
+            {
+              "doc": "personal_loan_v2.md",
+              "rule_id": "PL-TEN-001",
+              "version": "v2",
+              "policy_id": "LPQ-PL-2026-02",
+              "text": "## 7. Loan Tenure **Rule ID:** PL-TEN-001 Personal loan tenure must be between 12 months and 60 months (1 to 5 years). Tenures outside this range are not eligible under this policy."
+            }
+          ],
+          "app_id": "APP-2477E11C7043",
+          "rule_checks": [
+            {
+              "rule_id": "PL-AGE-001",
+              "rule_name": "Age",
+              "result": "PASS",
+              "detail": "Age 32 is within the allowed range 21–60 years.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹25,000 meets minimum ₹25,000.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-EMP-001",
+              "rule_name": "Employment Duration",
+              "result": "PASS",
+              "detail": "Salaried employment 36 months meets the 12-month requirement.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 760 meets minimum 700.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "FAIL",
+              "detail": "FOIR 66.4% exceeds maximum 50%.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "PASS",
+              "detail": "Amount ₹500,000 is within policy limits.",
+              "rule_version": "v2"
+            },
+            {
+              "rule_id": "PL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 36 months is within 12–60 months.",
+              "rule_version": "v2"
+            }
+          ]
+        }
+      }
+    ],
+    "last_decision": {
+      "decision": "NOT_ELIGIBLE",
+      "product": "personal_loan",
+      "rule_checks": [
+        {
+          "rule_id": "PL-AGE-001",
+          "rule_name": "Age",
+          "result": "PASS",
+          "detail": "Age 32 is within the allowed range 21–60 years.",
+          "rule_version": "v2"
+        },
+        {
+          "rule_id": "PL-INC-001",
+          "rule_name": "Minimum Income",
+          "result": "PASS",
+          "detail": "Monthly income ₹25,000 meets minimum ₹25,000.",
+          "rule_version": "v2"
+        },
+        {
+          "rule_id": "PL-EMP-001",
+          "rule_name": "Employment Duration",
+          "result": "PASS",
+          "detail": "Salaried employment 36 months meets the 12-month requirement.",
+          "rule_version": "v2"
+        },
+        {
+          "rule_id": "PL-CRD-001",
+          "rule_name": "Credit Score",
+          "result": "PASS",
+          "detail": "Credit score 760 meets minimum 700.",
+          "rule_version": "v2"
+        },
+        {
+          "rule_id": "PL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "FAIL",
+          "detail": "FOIR 66.4% exceeds maximum 50%.",
+          "rule_version": "v2"
+        },
+        {
+          "rule_id": "PL-AMT-001",
+          "rule_name": "Loan Amount",
+          "result": "PASS",
+          "detail": "Amount ₹500,000 is within policy limits.",
+          "rule_version": "v2"
+        },
+        {
+          "rule_id": "PL-TEN-001",
+          "rule_name": "Loan Tenure",
+          "result": "PASS",
+          "detail": "Tenure 36 months is within 12–60 months.",
+          "rule_version": "v2"
+        }
+      ],
+      "failed_rules": [
+        {
+          "rule_id": "PL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "FAIL",
+          "detail": "FOIR 66.4% exceeds maximum 50%."
+        }
+      ],
+      "manual_review_rules": [],
+      "missing_fields": [],
+      "policy_version": "v2"
+    },
+    "last_calcs": {
+      "emi": 16607.15,
+      "foir": 0.6643,
+      "max_affordable_loan": 376343.81,
+      "total_interest": 97857.4,
+      "total_payment": 597857.4
+    },
+    "last_citations": [
+      {
+        "doc": "personal_loan_v2.md",
+        "rule_id": "PL-AMT-001",
+        "version": "v2",
+        "policy_id": "LPQ-PL-2026-02",
+        "text": "## 6. Loan Amount **Rule ID:** PL-AMT-001 The minimum personal loan amount is ₹50,000 (fifty thousand rupees). The maximum personal loan amount is ₹30,00,000 (thirty lakh rupees). **Change from v1:** Maximum loan amount increased from ₹25L to ₹30L. Additionally, the loan amount must not exceed 30 ti"
+      },
+      {
+        "doc": "personal_loan_v2.md",
+        "rule_id": "PL-FOIR-001",
+        "version": "v2",
+        "policy_id": "LPQ-PL-2026-02",
+        "text": "## 5. Fixed Obligation to Income Ratio (FOIR) **Rule ID:** PL-FOIR-001 The Fixed Obligation to Income Ratio (FOIR) must not exceed 55%. **Change from v1:** Maximum FOIR increased from 50% to 55%. FOIR = (Existing Monthly EMIs + Proposed New EMI) ÷ Monthly Net Income ≤ 0.55 An applicant whose FOIR ex"
+      },
+      {
+        "doc": "personal_loan_v2.md",
+        "rule_id": "PL-INC-001",
+        "version": "v2",
+        "policy_id": "LPQ-PL-2026-02",
+        "text": "## 2. Minimum Income **Rule ID:** PL-INC-001 Applicants must have a minimum monthly net income of ₹22,000 (twenty-two thousand rupees) after all statutory deductions. **Change from v1:** Minimum income reduced from ₹25,000 to ₹22,000 to extend access to personal credit for a wider applicant base. Gr"
+      },
+      {
+        "doc": "personal_loan_v2.md",
+        "rule_id": "PL-DOC-001",
+        "version": "v2",
+        "policy_id": "LPQ-PL-2026-02",
+        "text": "## 8. Documentation Requirements **Rule ID:** PL-DOC-001 The following documents are required for a personal loan application: - Identity proof (Aadhaar card, PAN card, passport, or driving licence) - Address proof (utility bill, rental agreement, or bank statement) - Income proof: last 3 months pay"
+      },
+      {
+        "doc": "personal_loan_v2.md",
+        "rule_id": "PL-TEN-001",
+        "version": "v2",
+        "policy_id": "LPQ-PL-2026-02",
+        "text": "## 7. Loan Tenure **Rule ID:** PL-TEN-001 Personal loan tenure must be between 12 months and 60 months (1 to 5 years). Tenures outside this range are not eligible under this policy."
+      }
+    ],
+    "last_app_id": "APP-2477E11C7043",
+    "product": "personal_loan"
+  }
+}
