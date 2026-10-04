@@ -63,6 +63,7 @@ services:
       - "8001:8001"
     volumes:
       - ./rag:/app/data:ro          # loan policies + samples, read-only
+      - ./rag:/app/rag:ro           # enables direct rag imports inside container
       - ./rag/chroma:/app/rag/chroma # the persistent chroma index (rw)
       - chroma_cache:/home/appuser/.cache/chroma  # ~80 MB ONNX embed model, once
       - ./prompts:/app/prompts:ro
