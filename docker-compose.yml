@@ -38,7 +38,8 @@ services:
       - ./litellm:/app/litellm:ro
     command: ["--config", "/app/litellm/config.yaml", "--port", "4000"]
     env_file:
-      - .env                        # cloud keys (VISION_MODEL cloud path), if set
+      - path: .env
+        required: false                        # cloud keys (VISION_MODEL cloud path), if set
     environment:
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-sk-master-key-loanassist}
     depends_on:
@@ -75,7 +76,8 @@ services:
       - ./api/semantic_cache.py:/app/semantic_cache.py:ro
       - ./logs:/app/logs
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       LLM_BASE_URL: http://litellm:4000/v1   # v2 wiring: everything via the proxy
       LLM_API_KEY: ${LITELLM_MASTER_KEY:-sk-master-key-loanassist}
@@ -86,7 +88,7 @@ services:
       # host.docker.internal reaches the Langfuse stack on the host port 3005
       LANGFUSE_HOST: ${LANGFUSE_HOST:-http://host.docker.internal:3005}
       CHROMA_DIR: /app/rag/chroma
-      PROMPT_VERSION: ${PROMPT_VERSION}
+      PROMPT_VERSION: ${PROMPT_VERSION:-v1}
     depends_on:
       litellm:
         condition: service_healthy
