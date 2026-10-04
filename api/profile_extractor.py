@@ -87,7 +87,11 @@ Schema (use null for any unknown field):
   "vehicle_type":               "new" | "used" | null,
   "vehicle_age_years":          integer | null,
   "on_road_price":              float (INR) | null,
-  "vehicle_category":           "two_wheeler" | "four_wheeler" | "commercial" | null
+  "vehicle_category":           "two_wheeler" | "four_wheeler" | "commercial" | null,
+  "has_co_applicant":           boolean | null,
+  "co_applicant_income":        float (INR, monthly) | null,
+  "co_applicant_emi":           float (INR, total monthly) | null,
+  "co_applicant_relationship":  string | null
 }
 
 Semantic loan type detection (infer from context -- do not require exact phrasing):
@@ -148,13 +152,24 @@ def _parse_profile_json(raw: str) -> dict:
 def _normalise(data: dict) -> dict:
     """Type coercions, alias normalisation, and cross-field consistency."""
     for float_field in ("monthly_net_income", "existing_emi", "requested_amount",
-                        "property_value", "down_payment", "on_road_price"):
+                        "property_value", "down_payment", "on_road_price",
+                        "co_applicant_income", "co_applicant_emi"):
         v = data.get(float_field)
         if v is not None:
             try:
                 data[float_field] = float(v)
             except (TypeError, ValueError):
                 data[float_field] = None
+
+    # Normalise co-applicant status
+    if data.get("has_co_applicant") is not None:
+        v = data["has_co_applicant"]
+        if isinstance(v, str):
+            data["has_co_applicant"] = v.lower() in ("true", "yes", "1", "y")
+        else:
+            data["has_co_applicant"] = bool(v)
+    elif data.get("co_applicant_income") is not None and data.get("co_applicant_income") > 0:
+        data["has_co_applicant"] = True
 
     for int_field in ("age", "credit_score", "employment_duration_months",
                       "requested_tenure_months", "vehicle_age_years"):
@@ -342,6 +357,10 @@ def extract_profile(
         vehicle_age_years          = merged_data.get("vehicle_age_years"),
         on_road_price              = merged_data.get("on_road_price"),
         vehicle_category           = merged_data.get("vehicle_category"),
+        has_co_applicant           = merged_data.get("has_co_applicant"),
+        co_applicant_income        = merged_data.get("co_applicant_income"),
+        co_applicant_emi           = merged_data.get("co_applicant_emi"),
+        co_applicant_relationship  = merged_data.get("co_applicant_relationship"),
     )
 
     missing = profile.missing_fields()
@@ -369,7 +388,31 @@ FIELD_LABELS: dict[str, str] = {
     "vehicle_type":               "vehicle condition (new or used)",
     "on_road_price":              "total on-road price (ex-showroom + taxes + insurance)",
     "vehicle_category":           "vehicle category (two-wheeler, four-wheeler, or commercial)",
+    "has_co_applicant":           "whether you are adding a co-applicant",
+    "co_applicant_income":        "co-applicant's monthly net income (take-home pay)",
+    "co_applicant_emi":           "co-applicant's existing monthly EMI obligations (enter 0 if none)",
+    "co_applicant_relationship":  "relationship with co-applicant (e.g., spouse, parent)",
 }
+
+INFORMATIONAL_KEYWORDS = [
+    "what is", "what are", "how much", "can i", "is there", "tell me about",
+    "interest rate", "roi", "charges", "fees", "fee", "penalty", "penalties", "foreclose",
+    "foreclosure", "prepay", "pre-payment", "prepayment", "eligibility criteria",
+    "documents", "document", "docs", "paperwork", "property type", "agricultural",
+    "gram panchayat", "cibil", "credit score requirement", "tenure limit",
+    "max tenure", "maximum tenure", "minimum income", "how does", "explain",
+    "process", "tat", "turnaround", "processing fee", "stamp duty", "difference between",
+    "which is better", "why do you need", "what if", "rule", "policy"
+]
+
+def is_informational_query(text: str) -> bool:
+    """Return True if the text looks like an informational/policy/FAQ query."""
+    if not text:
+        return False
+    t = text.lower().strip()
+    if "?" in t:
+        return True
+    return any(kw in t for kw in INFORMATIONAL_KEYWORDS)
 
 DOC_CHECKLISTS = {
     "personal_loan": [

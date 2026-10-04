@@ -80,6 +80,12 @@ class ApplicantProfile:
     on_road_price:     Optional[float] = None  # total on-road price INR
     vehicle_category:  Optional[str]   = None  # "two_wheeler" | "four_wheeler" | "commercial"
 
+    # Co-applicant fields (retail banking reality: joint applicants)
+    has_co_applicant:          Optional[bool]  = None
+    co_applicant_income:       Optional[float] = None  # monthly, INR
+    co_applicant_emi:          Optional[float] = None  # total monthly, INR
+    co_applicant_relationship: Optional[str]   = None  # "spouse" | "parent" | "child"
+
     def to_dict(self) -> Dict[str, Any]:
         return {k: v for k, v in asdict(self).items() if v is not None}
 
@@ -91,10 +97,15 @@ class ApplicantProfile:
             "existing_emi", "requested_amount", "requested_tenure_months",
         ]
         if self.loan_type == "home_loan":
-            return common + ["property_value", "down_payment", "property_type"]
-        if self.loan_type == "auto_loan":
-            return common + ["vehicle_type", "on_road_price", "vehicle_category"]
-        return common  # personal_loan
+            fields = common + ["property_value", "down_payment", "property_type"]
+        elif self.loan_type == "auto_loan":
+            fields = common + ["vehicle_type", "on_road_price", "vehicle_category"]
+        else:
+            fields = common  # personal_loan
+
+        if self.has_co_applicant:
+            fields.append("co_applicant_income")
+        return fields
 
     def missing_fields(self) -> List[str]:
         """Return field names that are required but not yet provided."""
@@ -114,6 +125,8 @@ class EligibilityResult:
     failed_rules:        List[RuleCheck] = field(default_factory=list)
     manual_review_rules: List[RuleCheck] = field(default_factory=list)
     missing_fields:      List[str]       = field(default_factory=list)
+    remediation:         Optional[Dict[str, Any]] = None
+    remediation_notes:   List[str]       = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         def _rc(r: RuleCheck) -> dict:
@@ -123,14 +136,18 @@ class EligibilityResult:
                 "result":    r.result.value,
                 "detail":    r.detail,
             }
-        return {
+        d: Dict[str, Any] = {
             "decision":            self.decision.value,
             "product":             self.product,
             "rule_checks":         [_rc(r) for r in self.rule_checks],
             "failed_rules":        [_rc(r) for r in self.failed_rules],
             "manual_review_rules": [_rc(r) for r in self.manual_review_rules],
             "missing_fields":      self.missing_fields,
+            "remediation_notes":   self.remediation_notes,
         }
+        if self.remediation:
+            d["remediation"] = self.remediation
+        return d
 
 
 # ---------------------------------------------------------------------------
@@ -218,13 +235,16 @@ def _pl_income(p: ApplicantProfile, cfg: dict) -> RuleCheck:
         return RuleCheck("PL-INC-001", "Minimum Income", RuleResult.NOT_EVALUATED,
                          "Monthly income not provided.")
     minc = cfg["MIN_MONTHLY_INCOME"]
-    if p.monthly_net_income < minc:
+    effective_income = p.monthly_net_income + (p.co_applicant_income or 0.0)
+    if effective_income < minc:
         return RuleCheck("PL-INC-001", "Minimum Income", RuleResult.FAIL,
-                         f"Monthly income ₹{p.monthly_net_income:,.0f} is below "
+                         f"Monthly income ₹{effective_income:,.0f} is below "
                          f"minimum ₹{minc:,.0f}.")
-    return RuleCheck("PL-INC-001", "Minimum Income", RuleResult.PASS,
-                     f"Monthly income ₹{p.monthly_net_income:,.0f} meets "
-                     f"minimum ₹{minc:,.0f}.")
+    detail = f"Monthly income ₹{p.monthly_net_income:,.0f}"
+    if p.co_applicant_income:
+        detail += f" (household ₹{effective_income:,.0f} with co-applicant)"
+    detail += f" meets minimum ₹{minc:,.0f}."
+    return RuleCheck("PL-INC-001", "Minimum Income", RuleResult.PASS, detail)
 
 
 def _pl_employment(p: ApplicantProfile, cfg: dict) -> RuleCheck:
@@ -288,8 +308,9 @@ def _pl_amount(p: ApplicantProfile, cfg: dict, calcs) -> RuleCheck:
     if p.requested_amount > max_a:
         return RuleCheck("PL-AMT-001", "Loan Amount", RuleResult.FAIL,
                          f"Amount ₹{p.requested_amount:,.0f} > maximum ₹{max_a:,.0f}.")
-    if p.monthly_net_income:
-        cap = p.monthly_net_income * cfg["MAX_LOAN_INCOME_MULTIPLIER"]
+    income = (p.monthly_net_income or 0.0) + (p.co_applicant_income or 0.0)
+    if income > 0:
+        cap = income * cfg["MAX_LOAN_INCOME_MULTIPLIER"]
         if p.requested_amount > cap:
             return RuleCheck("PL-AMT-001", "Loan Amount", RuleResult.FAIL,
                              f"Amount ₹{p.requested_amount:,.0f} exceeds "
@@ -340,11 +361,15 @@ def _hl_income(p: ApplicantProfile, cfg: dict) -> RuleCheck:
         return RuleCheck("HL-INC-001", "Minimum Income", RuleResult.NOT_EVALUATED,
                          "Monthly income not provided.")
     minc = cfg["MIN_MONTHLY_INCOME"]
-    if p.monthly_net_income < minc:
+    effective_income = p.monthly_net_income + (p.co_applicant_income or 0.0)
+    if effective_income < minc:
         return RuleCheck("HL-INC-001", "Minimum Income", RuleResult.FAIL,
-                         f"Monthly income ₹{p.monthly_net_income:,.0f} < minimum ₹{minc:,.0f}.")
-    return RuleCheck("HL-INC-001", "Minimum Income", RuleResult.PASS,
-                     f"Monthly income ₹{p.monthly_net_income:,.0f} meets minimum ₹{minc:,.0f}.")
+                         f"Monthly household income ₹{effective_income:,.0f} < minimum ₹{minc:,.0f}.")
+    detail = f"Monthly income ₹{p.monthly_net_income:,.0f}"
+    if p.co_applicant_income:
+        detail += f" (household ₹{effective_income:,.0f} with co-applicant)"
+    detail += f" meets minimum ₹{minc:,.0f}."
+    return RuleCheck("HL-INC-001", "Minimum Income", RuleResult.PASS, detail)
 
 
 def _hl_employment(p: ApplicantProfile, cfg: dict) -> RuleCheck:
@@ -485,11 +510,15 @@ def _al_income(p: ApplicantProfile, cfg: dict) -> RuleCheck:
     if p.monthly_net_income is None:
         return RuleCheck("AL-INC-001", "Minimum Income", RuleResult.NOT_EVALUATED, "Monthly income not provided.")
     minc = cfg["MIN_MONTHLY_INCOME"]
-    if p.monthly_net_income < minc:
+    effective_income = p.monthly_net_income + (p.co_applicant_income or 0.0)
+    if effective_income < minc:
         return RuleCheck("AL-INC-001", "Minimum Income", RuleResult.FAIL,
-                         f"Monthly income Rs.{p.monthly_net_income:,.0f} < minimum Rs.{minc:,.0f}.")
-    return RuleCheck("AL-INC-001", "Minimum Income", RuleResult.PASS,
-                     f"Monthly income Rs.{p.monthly_net_income:,.0f} meets minimum Rs.{minc:,.0f}.")
+                         f"Monthly income Rs.{effective_income:,.0f} < minimum Rs.{minc:,.0f}.")
+    detail = f"Monthly income Rs.{p.monthly_net_income:,.0f}"
+    if p.co_applicant_income:
+        detail += f" (household Rs.{effective_income:,.0f} with co-applicant)"
+    detail += f" meets minimum Rs.{minc:,.0f}."
+    return RuleCheck("AL-INC-001", "Minimum Income", RuleResult.PASS, detail)
 
 
 def _al_employment(p: ApplicantProfile, cfg: dict) -> RuleCheck:
@@ -606,6 +635,9 @@ def _aggregate(
     checks:         List[RuleCheck],
     missing_fields: List[str],
     product:        str,
+    profile:        Optional[ApplicantProfile] = None,
+    calcs:          Optional[Any] = None,
+    cfg:            Optional[Dict[str, Any]] = None,
 ) -> EligibilityResult:
     failed  = [c for c in checks if c.result == RuleResult.FAIL]
     manual  = [c for c in checks if c.result == RuleResult.MANUAL_REVIEW]
@@ -623,6 +655,37 @@ def _aggregate(
     else:
         decision = Decision.POTENTIALLY_ELIGIBLE
 
+    remediation_dict = None
+    remediation_notes = []
+
+    if decision in (Decision.NOT_ELIGIBLE, Decision.MANUAL_REVIEW) and profile and cfg:
+        max_ltv = None
+        if product == "home_loan":
+            req_amt = profile.requested_amount or 0.0
+            threshold = cfg.get("LTV_HIGH_VALUE_THRESHOLD", 30_00_000)
+            max_ltv = cfg.get("MAX_LTV_HIGH_VALUE", 0.80) if req_amt > threshold else cfg.get("MAX_LTV_STANDARD", 0.85)
+        elif product == "auto_loan":
+            max_ltv = cfg.get("MAX_LTV_USED_VEHICLE", 0.70) if profile.vehicle_type == "used" else cfg.get("MAX_LTV_NEW_VEHICLE", 0.85)
+
+        from calculators import calculate_remediation_options
+        rem_advice = calculate_remediation_options(
+            requested_amount    = profile.requested_amount,
+            monthly_income      = profile.monthly_net_income,
+            existing_emi        = profile.existing_emi,
+            tenure_months       = profile.requested_tenure_months,
+            annual_rate_pct     = cfg.get("ANNUAL_RATE_PCT", 10.5),
+            max_foir            = cfg.get("MAX_FOIR", 0.50),
+            max_tenure_months   = cfg.get("MAX_TENURE_MONTHS", 60),
+            property_value      = profile.property_value,
+            on_road_price       = profile.on_road_price,
+            max_ltv             = max_ltv,
+            co_applicant_income = profile.co_applicant_income,
+            co_applicant_emi    = profile.co_applicant_emi,
+        )
+        if rem_advice.feasible or rem_advice.remediation_notes:
+            remediation_dict = rem_advice.to_dict()
+            remediation_notes = rem_advice.remediation_notes
+
     return EligibilityResult(
         decision=decision,
         product=product,
@@ -630,6 +693,8 @@ def _aggregate(
         failed_rules=failed,
         manual_review_rules=manual,
         missing_fields=missing_fields,
+        remediation=remediation_dict,
+        remediation_notes=remediation_notes,
     )
 
 
@@ -650,7 +715,7 @@ def evaluate_personal_loan(profile: ApplicantProfile, calcs) -> EligibilityResul
         _pl_amount(profile, cfg, calcs),
         _pl_tenure(profile, cfg),
     ]
-    return _aggregate(checks, missing, "personal_loan")
+    return _aggregate(checks, missing, "personal_loan", profile=profile, calcs=calcs, cfg=cfg)
 
 
 def evaluate_home_loan(profile: ApplicantProfile, calcs) -> EligibilityResult:
@@ -668,7 +733,7 @@ def evaluate_home_loan(profile: ApplicantProfile, calcs) -> EligibilityResult:
         _hl_amount(profile, cfg, calcs),
         _hl_tenure(profile, cfg),
     ]
-    return _aggregate(checks, missing, "home_loan")
+    return _aggregate(checks, missing, "home_loan", profile=profile, calcs=calcs, cfg=cfg)
 
 
 def evaluate_auto_loan(profile: ApplicantProfile, calcs) -> EligibilityResult:
@@ -686,7 +751,7 @@ def evaluate_auto_loan(profile: ApplicantProfile, calcs) -> EligibilityResult:
         _al_amount(profile, cfg, calcs),
         _al_tenure(profile, cfg),
     ]
-    return _aggregate(checks, missing, "auto_loan")
+    return _aggregate(checks, missing, "auto_loan", profile=profile, calcs=calcs, cfg=cfg)
 
 
 def run_rules_engine(profile: ApplicantProfile, calcs) -> EligibilityResult:

@@ -1,0 +1,225 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="ProgId" content="Word.Document">
+<meta name="Generator" content="Microsoft Word 15">
+<title>LoanAssist v3.0 — Jury &amp; Leadership Q&amp;A Defense Guide</title>
+<!--[if gte mso 9]>
+<xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+  <w:Zoom>100</w:Zoom>
+  <w:DoNotOptimizeForBrowser/>
+ </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+<!--
+@page WordSection1 {
+    size: 8.5in 11.0in;
+    margin: 0.7in 0.7in 0.7in 0.7in;
+}
+div.WordSection1 { page: WordSection1; }
+body {
+    font-family: "Calibri", "Segoe UI", sans-serif;
+    font-size: 10.5pt;
+    color: #1e293b;
+    line-height: 1.42;
+}
+h1 {
+    font-family: "Cambria", Georgia, serif;
+    font-size: 16.5pt;
+    color: #0e1e38;
+    border-bottom: 2pt solid #b5651d;
+    padding-bottom: 3pt;
+    margin-top: 16pt;
+    margin-bottom: 8pt;
+}
+h2 {
+    font-family: "Calibri", sans-serif;
+    font-size: 11.5pt;
+    font-weight: bold;
+    color: #1b3a6b;
+    margin-top: 11pt;
+    margin-bottom: 4pt;
+}
+.header-banner {
+    background-color: #0e1e38;
+    color: #ffffff;
+    padding: 18pt 20pt;
+    border-bottom: 4pt solid #b5651d;
+    margin-bottom: 12pt;
+}
+.qa-box {
+    background-color: #f8fafc;
+    border-left: 4pt solid #1b3a6b;
+    padding: 8pt 12pt;
+    margin: 4pt 0pt 10pt 0pt;
+}
+.tech-note {
+    font-size: 9.5pt;
+    color: #475569;
+    margin-top: 4pt;
+}
+.code {
+    font-family: "Consolas", monospace;
+    font-size: 9pt;
+    background-color: #e2e8f0;
+    padding: 1pt 3pt;
+    color: #0e1e38;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 6pt;
+    margin-bottom: 12pt;
+    font-size: 9.5pt;
+}
+th {
+    background-color: #0e1e38;
+    color: #ffffff;
+    text-align: left;
+    padding: 5pt 8pt;
+    border: 1pt solid #0e1e38;
+}
+td {
+    padding: 5pt 8pt;
+    border: 1pt solid #cbd5e1;
+    vertical-align: top;
+}
+.page-break { page-break-before: always; }
+-->
+</style>
+</head>
+<body>
+<div class="WordSection1">
+
+<div class="header-banner">
+    <div style="font-size:9.5pt; font-weight:bold; color:#f59e0b; letter-spacing:1pt;">EXL AI SERVICES CAPSTONE &middot; 10-MINUTE PANEL Q&amp;A PREP</div>
+    <div style="font-family:Cambria,serif; font-size:21pt; font-weight:bold; margin:4pt 0pt;">LoanAssist v3.0 — Jury &amp; Leadership Q&amp;A Defense Guide</div>
+    <div style="font-size:10.5pt; color:#cbd5e1;">Executive 15-second answers + deep technical code backups across all 8 panel challenge areas</div>
+</div>
+
+<h1>0. 60-Second Quick-Fire Numbers Cheat Sheet (Memorize First)</h1>
+<table>
+    <tr>
+        <th style="width:28%;">Metric / Component</th>
+        <th style="width:34%;">Exact Value in LoanAssist v3.0</th>
+        <th style="width:38%;">Key File / Function</th>
+    </tr>
+    <tr>
+        <td><b>Loan Products &amp; Versions</b></td>
+        <td><b>3 Products:</b> Personal (<span class="code">v1/v2</span>), Home (<span class="code">v1/v2</span>), Auto (<span class="code">v1</span>)</td>
+        <td><span class="code">rag/policies/*.md</span></td>
+    </tr>
+    <tr>
+        <td><b>Total Policy Corpus</b></td>
+        <td><b>40 Chunks:</b> 18 PL + 11 HL + 11 AL</td>
+        <td><span class="code">rag/ingest.py</span></td>
+    </tr>
+    <tr>
+        <td><b>Vector DB &amp; Embeddings</b></td>
+        <td><b>ChromaDB 1.5.9</b> + <span class="code">all-MiniLM-L6-v2</span> (local ONNX, $0 cost)</td>
+        <td><span class="code">api/app.py :: retrieve_for_product()</span></td>
+    </tr>
+    <tr>
+        <td><b>Deterministic Rules Count</b></td>
+        <td><b>25 Rule Evaluators:</b> 8 PL + 8 HL + 9 AL</td>
+        <td><span class="code">api/rules_engine.py</span></td>
+    </tr>
+    <tr>
+        <td><b>Applicant Profile Schema</b></td>
+        <td><b>18 Typed Fields</b> + <b>30+ Semantic Loan Aliases</b></td>
+        <td><span class="code">api/profile_extractor.py</span></td>
+    </tr>
+    <tr>
+        <td><b>Streaming &amp; Backpressure</b></td>
+        <td><b>SSE</b> over <span class="code">asyncio.Queue(maxsize=20)</span> + sentence buffer</td>
+        <td><span class="code">api/app.py :: _chat_producer()</span></td>
+    </tr>
+    <tr>
+        <td><b>Automated Test &amp; Gate Suite</b></td>
+        <td><b>80 Pytest Tests (0.16s)</b> + <b>15 Promptfoo Gates</b> + <b>18 Benchmark Cases</b></td>
+        <td><span class="code">.github/workflows/eval-gate.yml</span></td>
+    </tr>
+</table>
+
+<h1>1. Architecture &amp; Neuro-Symbolic Trade-Offs</h1>
+
+<h2>Q1.1: &ldquo;Why didn't you let the LLM evaluate eligibility directly from the RAG chunks? Why write a Python rules engine?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;In banking, eligibility relies on compound-interest EMI formulas and 10 interacting numerical cutoffs. Even large LLMs hallucinate reducing-balance math or flip pass/fail decisions on borderline numbers like FOIR at 40.1% versus 40.0%. By splitting the architecture—letting the LLM handle natural-language extraction and grounded explanation while pure Python executes the math and rules—we guarantee <b>0% arithmetic hallucination and 100% deterministic reproducibility</b>.&rdquo;
+    <div class="tech-note"><b>Code Backup:</b> <span class="code">api/calculators.py</span> computes reducing-balance EMI, FOIR, LTV, and Max Loan in &lt;1ms; <span class="code">api/rules_engine.py</span> evaluates all 25 rules and injects the structured <span class="code">EligibilityResult</span> into the explanation prompt.</div>
+</div>
+
+<h2>Q1.2: &ldquo;If Python executes the rules, what is the actual role of RAG and ChromaDB? Is RAG redundant?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;They serve complementary roles. The <b>Python rules engine</b> computes the binary pass/fail decision on structured thresholds, while <b>Versioned ChromaDB RAG</b> retrieves the official policy text, qualitative exception rules, documentation clauses, and Rule IDs for the active version (<span class="code">v1</span> or <span class="code">v2</span>) so the assistant can answer free-form policy questions and ground every explanation in verified Rule IDs.&rdquo;
+    <div class="tech-note"><b>Code Backup:</b> <span class="code">retrieve_for_product()</span> pulls the top-6 version-filtered chunks from ChromaDB, and <span class="code">verify_citations()</span> strips any cited Rule ID not present in those retrieved chunks.</div>
+</div>
+
+<h2>Q1.3: &ldquo;How do you prevent drift between the Markdown policy files and the Python rule configs?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;Through our <b>CI/CD Evaluation Gate</b>. Our 15 Promptfoo test cases and 18 benchmark cases assert both the deterministic decision AND the cited RAG Rule IDs together. If someone updates a policy Markdown file or switches <span class="code">ACTIVE_PERSONAL_LOAN_VERSION</span> without updating the rule config, the CI pipeline fails and blocks the PR merge.&rdquo;
+</div>
+
+<h1>2. RAG, Chunking, Embeddings &amp; Policy Versioning</h1>
+
+<h2>Q2.1: &ldquo;How do you chunk the policy documents, and why did you choose that strategy?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;Instead of fixed-character sliding windows that slice rules in half, <span class="code">rag/ingest.py</span> uses <b>structure-aware Markdown section chunking</b> (<span class="code">## N. Section Title</span>). Each numbered policy clause (including its <span class="code">Rule ID</span>) becomes an atomic chunk enriched with YAML frontmatter metadata (<span class="code">policy_id</span>, <span class="code">version</span>, <span class="code">product</span>, <span class="code">rule_ids</span>).&rdquo;
+</div>
+
+<h2>Q2.2: &ldquo;How does policy versioning work when Credit Risk updates a policy from v1 to v2?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;Both <span class="code">v1</span> and <span class="code">v2</span> chunks live side-by-side in ChromaDB tagged with metadata <span class="code">version: 'v1'</span> or <span class="code">'v2'</span>. At query time, <span class="code">retrieve_for_product()</span> filters strictly with <span class="code">where={'version': active_version}</span> read from environment variables (<span class="code">ACTIVE_PERSONAL_LOAN_VERSION=v2</span>). Promoting or rolling back a policy version takes seconds with zero code edits and zero cross-version leakage.&rdquo;
+</div>
+
+<h2>Q2.3: &ldquo;Why did you create separate ChromaDB collections per product (<span class="code">personal_loan</span>, <span class="code">home_loan</span>, <span class="code">auto_loan</span>)?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;Because every loan product has identical section titles—'Age Eligibility', 'Minimum Income', 'Credit Score', 'FOIR'. In a single shared collection, a query about 'minimum credit score' could pull <span class="code">PL-CRD-001</span> (700) when the user is asking about an Auto Loan (<span class="code">AL-CRD-001</span>, which is 680). Product-isolated collections guarantee <b>zero cross-product retrieval contamination</b>.&rdquo;
+</div>
+
+<div class="page-break"></div>
+<h1>3. Streaming, Backpressure &amp; Mid-Stream Error Handling</h1>
+
+<h2>Q3.1: &ldquo;How did you implement streaming backpressure and mid-stream error handling?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;In <span class="code">api/app.py</span>, <span class="code">POST /chat/stream</span> uses an async producer-consumer pattern over a bounded <span class="code">asyncio.Queue(maxsize=20)</span>. If a slow client stops reading SSE events, the queue fills up and <span class="code">await queue.put()</span> automatically pauses the LLM producer coroutine—preventing unbounded memory growth. And if the LLM fails mid-stream, our <span class="code">try/except</span> block falls back to a deterministic Python summary and always closes cleanly with a <span class="code">done</span> event.&rdquo;
+</div>
+
+<h2>Q3.2: &ldquo;How do you enforce output guardrails on a streaming response before the user sees prohibited text?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;Instead of streaming raw tokens blindly, <span class="code">_chat_producer()</span> buffers tokens up to <b>sentence boundaries</b> (<span class="code">[.!?]\s</span>) and runs <span class="code">check_output()</span> on each complete sentence before flushing it to the SSE queue. That gives us real-time streaming responsiveness while catching prohibited phrases like <i>'guaranteed approval'</i> before they ever leave the server.&rdquo;
+</div>
+
+<h1>4. Semantic Routing &amp; Multi-Turn Conversation Memory</h1>
+
+<h2>Q4.1: &ldquo;How does the assistant understand 'house loan' or 'scooter loan' without UI tags?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;We use a two-layer approach in <span class="code">api/profile_extractor.py</span>: first, the LLM extraction prompt (<span class="code">temperature=0</span>) maps natural phrasing to canonical loan types and vehicle categories; second, a deterministic Python <span class="code">LOAN_TYPE_ALIAS_MAP</span> (30+ synonyms like <i>house loan, building loan, flat loan, scooter loan, bus loan, EV loan</i>) normalizes the output.&rdquo;
+</div>
+
+<h2>Q4.2: &ldquo;How does the assistant remember prior turns without re-asking known fields?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;Every <span class="code">decision</span> event returns the serialized <span class="code">ApplicantProfile</span> to the UI, which passes it back as <span class="code">prior_profile</span> on the next turn. <span class="code">_merge_profiles(prior, new_data)</span> keeps all previously extracted non-null fields and overlays newly provided fields—and automatically clears stale property/vehicle fields if the user switches loan products.&rdquo;
+</div>
+
+<h1>5. CI/CD Evaluation Gates, Safety, Latency &amp; Cost</h1>
+
+<h2>Q5.1: &ldquo;How do you prove your CI/CD gate blocks a merge when accuracy regresses?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;In <span class="code">.github/workflows/eval-gate.yml</span>, Stage 1 runs 80 <span class="code">pytest</span> tests on every push, and Stage 2 runs 15 Promptfoo gates and our 18-case benchmark on Pull Requests. Test case <span class="code">PL-002</span> tests an applicant with CIBIL 660. Under active <span class="code">v2</span> (min CIBIL 700), it must return <span class="code">NOT_ELIGIBLE</span>. If a developer accidentally points Personal Loan back to <span class="code">v1</span> (where 650 passed) or weakens the rule, <span class="code">PL-002</span> fails with exit code 1 and GitHub blocks the PR merge.&rdquo;
+</div>
+
+<h2>Q5.2: &ldquo;What is your latency and cost per conversation, and why use local Qwen2.5-1.5B?&rdquo;</h2>
+<div class="qa-box">
+    <b>15-Second Answer:</b> &ldquo;Guardrails, financial calculators, and the Python rules engine execute in <b>under 4 milliseconds combined</b>, and local ChromaDB retrieval takes <b>~20 milliseconds</b>. Because Python handles 100% of the math and rule logic, a compact local <span class="code">Qwen2.5-1.5B-Instruct</span> model is sufficient for extraction and grounded explanation—giving us <b>$0.00 marginal API cost</b> and <b>zero customer data egress</b>, while LiteLLM (<span class="code">:4000</span>) lets us switch to GPU or cloud models via config.&rdquo;
+</div>
+
+</div>
+</body>
+</html>

@@ -3739,5 +3739,29 @@
     "last_citations": [],
     "last_app_id": null,
     "product": null
+  },
+  "conv-913c2194": {
+    "session_id": "conv-913c2194",
+    "title": "I want a personal loan of…",
+    "created_at": 1790515695.3760953,
+    "updated_at": 1790515699.5152652,
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want a personal loan of ₹5,00,000. Age 32, salaried, monthly income ₹75,000, 3 years at company, credit score 760, no existing EMIs, tenure 36 months."
+      },
+      {
+        "role": "assistant",
+        "content": "",
+        "meta": {
+          "error": "❌ Lost connection to API at `http://localhost:8001`. Please check server status."
+        }
+      }
+    ],
+    "last_decision": null,
+    "last_calcs": null,
+    "last_citations": [],
+    "last_app_id": null,
+    "product": null
   }
 }

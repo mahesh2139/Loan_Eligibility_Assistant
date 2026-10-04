@@ -35,6 +35,7 @@ import json
 import logging
 import os
 import re
+import sys
 import time
 import uuid
 from pathlib import Path
@@ -50,7 +51,13 @@ from pydantic import BaseModel, Field
 
 from calculators import run_all_calculators
 from guardrails import REFUSAL, check_input, check_output
-from profile_extractor import describe_missing, extract_profile
+from profile_extractor import (
+    describe_missing,
+    extract_profile,
+    is_document_request,
+    get_doc_checklist,
+    is_informational_query,
+)
 from prompts.loader import load_prompt
 from redact import redact
 from rules_engine import (
@@ -60,7 +67,8 @@ from rules_engine import (
     ApplicantProfile,
     run_rules_engine,
 )
-from profile_extractor import is_document_request, get_doc_checklist
+from session_store import global_session_store
+from semantic_cache import global_semantic_cache
 
 # ── logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(level=logging.INFO)
@@ -122,8 +130,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── ChromaDB ──────────────────────────────────────────────────────────────────
+# ── ChromaDB & Hybrid Retriever ──────────────────────────────────────────────
 _chroma = chromadb.PersistentClient(path=CHROMA_DIR)
+
+rag_path = str(Path(__file__).resolve().parent.parent / "rag")
+if rag_path not in sys.path:
+    sys.path.insert(0, rag_path)
+try:
+    from hybrid_retriever import HybridRetriever
+    _hybrid_retriever = HybridRetriever(_chroma, default_top_k=TOP_K)
+    logger.info("HybridRetriever initialized (dense vector + BM25 sparse + RRF)")
+except Exception as _ret_err:
+    logger.warning("Could not initialize HybridRetriever (%s) — using standard Chroma", _ret_err)
+    _hybrid_retriever = None
 
 
 def _get_collection(name: str):
@@ -143,12 +162,23 @@ def get_active_version(product: str) -> str:
 
 
 def retrieve_for_product(query: str, product: str, top_k: int = TOP_K) -> list[dict]:
-    """Retrieve top-K clauses from the product-specific collection.
+    """Retrieve top-K clauses from the product-specific collection using Hybrid RAG.
 
-    Filters by active policy version via ChromaDB metadata `where`.
-    Falls back to the generic 'eligibility' collection on error.
+    Filters by active policy version via metadata `where` and combines with BM25.
+    Falls back gracefully to standard ChromaDB query on error.
     """
     version = get_active_version(product)
+    if _hybrid_retriever is not None:
+        try:
+            return _hybrid_retriever.retrieve(
+                query=query,
+                product=product,
+                version=version,
+                top_k=top_k,
+            )
+        except Exception as exc:
+            logger.warning("Hybrid retrieval error: %s — falling back to standard Chroma", exc)
+
     try:
         col = _get_collection(product)
         n = min(top_k, col.count())
@@ -185,28 +215,26 @@ def retrieve_for_product(query: str, product: str, top_k: int = TOP_K) -> list[d
 
 
 # ── session + audit stores ────────────────────────────────────────────────────
-_conv_store:    Dict[str, list]         = {}  # session_id → [{role, content}]
-_profile_store: Dict[str, dict]         = {}  # session_id → profile dict
-_audit_store:   Dict[str, dict]         = {}  # application_id → audit record
+_audit_store: Dict[str, dict] = {}  # application_id → audit record
 
 IDEMPOTENCY_TTL_S = 600
 _idem_cache: Dict[str, tuple[float, dict]] = {}
 
 
 def _session_history(sid: str) -> list:
-    return _conv_store.get(sid, [])
+    return global_session_store.get_history(sid)
 
 
 def _save_msg(sid: str, role: str, content: str):
-    _conv_store.setdefault(sid, []).append({"role": role, "content": content})
+    global_session_store.save_message(sid, role, content)
 
 
 def _save_profile(sid: str, profile: ApplicantProfile):
-    _profile_store[sid] = profile.to_dict()
+    global_session_store.save_profile(sid, profile.to_dict())
 
 
 def _get_profile(sid: str) -> Optional[ApplicantProfile]:
-    d = _profile_store.get(sid)
+    d = global_session_store.get_profile(sid)
     return ApplicantProfile(**d) if d else None
 
 
@@ -481,11 +509,12 @@ async def _chat_producer(
 
         # ── Synchronize client history if provided ────────────────────────────
         if client_history is not None:
-            _conv_store[session_id] = [
+            clean_msgs = [
                 {"role": m.role, "content": m.content}
                 for m in client_history
                 if m.content and m.role in ("user", "assistant")
             ]
+            global_session_store.set_history(session_id, clean_msgs)
 
         # ── Save user turn and extract profile ────────────────────────────────
         _save_msg(session_id, "user", message)
@@ -505,6 +534,25 @@ async def _chat_producer(
             "missing_fields": missing,
         }))
 
+        # ── Layer 1.5: Fast Semantic FAQ Cache (sub-15ms) ──────────────────────
+        cache_hit = global_semantic_cache.lookup(message, product=profile.loan_type if profile else None)
+        if cache_hit:
+            cached_ans, cached_srcs, sim_score = cache_hit
+            extra_hint = ""
+            if missing:
+                extra_hint = f"\n\n*(Note: To complete your eligibility assessment, please also provide: {describe_missing(missing)})*"
+            final_reply = cached_ans + extra_hint
+            await queue.put(json.dumps({"type": "content", "delta": final_reply}))
+            await queue.put(json.dumps({
+                "type": "done",
+                "application_id": application_id,
+                "cached": True,
+                "cache_similarity": round(sim_score, 2),
+                "latency_ms": round((time.perf_counter() - t0) * 1000),
+            }))
+            _save_msg(session_id, "assistant", final_reply)
+            return
+
         # ── Check if user is asking about documents ───────────────────────────
         if is_document_request(message) and profile.loan_type:
             doc_text = get_doc_checklist(profile.loan_type)
@@ -521,6 +569,30 @@ async def _chat_producer(
                 full_answer = await _stream_llm(doc_messages, queue, max_tokens=300)
                 _save_msg(session_id, "assistant", full_answer)
                 return
+
+        # ── Informational query side-routing (avoids missing-field lock) ───────
+        if is_informational_query(message) and missing:
+            info_product = profile.loan_type or "eligibility"
+            rag_sources = retrieve_for_product(message, info_product)
+            rag_context = _rag_context_str(rag_sources)
+            missing_reminder = describe_missing(missing)
+
+            info_system = (
+                "You are LoanAssist, an expert and helpful banking loan advisor. "
+                "The applicant is asking a general policy or informational question.\n\n"
+                f"Policy Context:\n{rag_context}\n\n"
+                "Instructions:\n"
+                "1. Answer the applicant's question directly, accurately, and concisely based on the policy context.\n"
+                "2. Conclude warmly by reminding them that you can assess their exact eligibility as soon as they provide:\n"
+                f"{missing_reminder}\n"
+            )
+            messages = [
+                {"role": "system", "content": info_system},
+                *history,
+            ]
+            full_answer = await _stream_llm(messages, queue, max_tokens=300)
+            _save_msg(session_id, "assistant", full_answer)
+            return
 
         # ── User asking directly for eligibility assessment ───────────────────
         user_wants_decision = any(kw in message.lower() for kw in [
@@ -576,16 +648,18 @@ async def _chat_producer(
         rag_query = message + " " + " ".join(f"{k}={v}" for k, v in profile.to_dict().items())
         rag_sources = retrieve_for_product(rag_query, product)
 
-        # 2. Calculators
+        # 2. Calculators (with co-applicant pooling)
         calcs = run_all_calculators(
-            requested_amount = profile.requested_amount,
-            monthly_income   = profile.monthly_net_income,
-            existing_emi     = profile.existing_emi,
-            tenure_months    = profile.requested_tenure_months,
-            annual_rate_pct  = cfg["ANNUAL_RATE_PCT"],
-            max_foir         = cfg["MAX_FOIR"],
-            property_value   = profile.property_value if product == "home_loan" else None,
-            on_road_price    = profile.on_road_price if product == "auto_loan" else None,
+            requested_amount    = profile.requested_amount,
+            monthly_income      = profile.monthly_net_income,
+            existing_emi        = profile.existing_emi,
+            tenure_months       = profile.requested_tenure_months,
+            annual_rate_pct     = cfg["ANNUAL_RATE_PCT"],
+            max_foir            = cfg["MAX_FOIR"],
+            property_value      = profile.property_value if product == "home_loan" else None,
+            on_road_price       = profile.on_road_price if product == "auto_loan" else None,
+            co_applicant_income = profile.co_applicant_income,
+            co_applicant_emi    = profile.co_applicant_emi,
         )
 
         # 3. Deterministic rules engine
@@ -625,6 +699,12 @@ async def _chat_producer(
             "type": "decision",
             "data": decision_dict,
         }))
+
+        if result.remediation:
+            await queue.put(json.dumps({
+                "type": "remediation",
+                "data": result.remediation,
+            }))
 
         # 6. Calculations event
         await queue.put(json.dumps({
@@ -848,14 +928,16 @@ async def scenario(req: ScenarioRequest):
         cfg = _AL_CFG  # auto_loan
 
     calcs = run_all_calculators(
-        requested_amount = profile.requested_amount,
-        monthly_income   = profile.monthly_net_income,
-        existing_emi     = profile.existing_emi,
-        tenure_months    = profile.requested_tenure_months,
-        annual_rate_pct  = cfg["ANNUAL_RATE_PCT"],
-        max_foir         = cfg["MAX_FOIR"],
-        property_value   = profile.property_value if product == "home_loan" else None,
-        on_road_price    = profile.on_road_price if product == "auto_loan" else None,
+        requested_amount    = profile.requested_amount,
+        monthly_income      = profile.monthly_net_income,
+        existing_emi        = profile.existing_emi,
+        tenure_months       = profile.requested_tenure_months,
+        annual_rate_pct     = cfg["ANNUAL_RATE_PCT"],
+        max_foir            = cfg["MAX_FOIR"],
+        property_value      = profile.property_value if product == "home_loan" else None,
+        on_road_price       = profile.on_road_price if product == "auto_loan" else None,
+        co_applicant_income = profile.co_applicant_income,
+        co_applicant_emi    = profile.co_applicant_emi,
     )
 
     result = run_rules_engine(profile, calcs)
@@ -911,7 +993,52 @@ async def ask(
     profile, missing = extract_profile(history, client, LLM_MODEL, prior_profile)
     _save_profile(session_id, profile)
 
+    # Layer 1.5: Fast Semantic FAQ Cache (sub-15ms)
+    cache_hit = global_semantic_cache.lookup(req.question, product=profile.loan_type if profile else None)
+    if cache_hit:
+        cached_ans, cached_srcs, sim_score = cache_hit
+        extra_hint = ""
+        if missing:
+            extra_hint = f"\n\n*(Note: To complete your eligibility assessment, please also provide: {describe_missing(missing)})*"
+        final_reply = cached_ans + extra_hint
+        _save_msg(session_id, "assistant", final_reply)
+        return AskResponse(
+            answer=final_reply,
+            decision=None,
+            citations=[
+                Citation(doc=s.get("doc", ""), text=s.get("rule_id", ""), rule_id=s.get("rule_id"), version="v1")
+                for s in cached_srcs
+            ],
+            confidence="high",
+            refused=False,
+            prompt_version=PROMPT_VERSION,
+        )
+
     if missing:
+        # Informational side-routing if user asked a policy question
+        if is_informational_query(req.question):
+            info_product = profile.loan_type or "eligibility"
+            rag_sources = retrieve_for_product(req.question, info_product)
+            rag_context = _rag_context_str(rag_sources)
+            info_system = (
+                "You are LoanAssist, an expert retail loan advisor. "
+                "The applicant is asking a general policy or informational question.\n\n"
+                f"Policy Context:\n{rag_context}\n\n"
+                "Answer directly and concisely, then warmly remind them of the missing info:\n"
+                f"{describe_missing(missing)}"
+            )
+            messages = [{"role": "system", "content": info_system}, *history]
+            answer = await _non_stream_llm(messages, max_tokens=300)
+            safe = check_output(answer)
+            _save_msg(session_id, "assistant", safe["text"])
+            return AskResponse(
+                answer=safe["text"] or REFUSAL,
+                refused=safe["refused"],
+                reason=safe["reason"],
+                confidence="high",
+                prompt_version=PROMPT_VERSION,
+            )
+
         # Conversation agent
         profile_summary = "\n".join(f"  {k}: {v}" for k, v in profile.to_dict().items()) or "  (nothing yet)"
         system_text = CONV_PROMPT["text"].format(
@@ -954,11 +1081,17 @@ async def ask(
         product,
     )
 
-    calcs  = run_all_calculators(
-        profile.requested_amount, profile.monthly_net_income, profile.existing_emi,
-        profile.requested_tenure_months, cfg["ANNUAL_RATE_PCT"], cfg["MAX_FOIR"],
-        property_value=profile.property_value if product == "home_loan" else None,
-        on_road_price=profile.on_road_price if product == "auto_loan" else None,
+    calcs = run_all_calculators(
+        requested_amount    = profile.requested_amount,
+        monthly_income      = profile.monthly_net_income,
+        existing_emi        = profile.existing_emi,
+        tenure_months       = profile.requested_tenure_months,
+        annual_rate_pct     = cfg["ANNUAL_RATE_PCT"],
+        max_foir            = cfg["MAX_FOIR"],
+        property_value      = profile.property_value if product == "home_loan" else None,
+        on_road_price       = profile.on_road_price if product == "auto_loan" else None,
+        co_applicant_income = profile.co_applicant_income,
+        co_applicant_emi    = profile.co_applicant_emi,
     )
     result = run_rules_engine(profile, calcs)
 

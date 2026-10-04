@@ -439,6 +439,53 @@ html, body, [data-testid="stAppViewContainer"] {
     gap: 8px;
     margin: 0.6rem 0;
 }
+
+/* ── DPDP Act Banner ── */
+.dpdp-banner {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    padding: 0.65rem 0.95rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    margin-bottom: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+/* ── Remediation Box ── */
+.remediation-box {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 0.85rem 1.1rem;
+    margin: 0.75rem 0 0.5rem 0;
+    font-size: 0.87rem;
+    line-height: 1.5;
+}
+.remediation-title {
+    font-weight: 700;
+    color: #b45309;
+    margin-bottom: 4px;
+    font-size: 0.88rem;
+}
+.remediation-subtitle {
+    color: #78350f;
+    font-size: 0.81rem;
+    margin-bottom: 6px;
+}
+.remediation-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #451a03;
+}
+.remediation-list li {
+    margin-bottom: 4px;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -567,6 +614,22 @@ def _rule_rows_html(rule_checks: list) -> str:
     return "<div class='rule-table'>" + "".join(rows) + "</div>"
 
 
+def _remediation_card_html(remediation: dict | None) -> str:
+    if not remediation:
+        return ""
+    notes = remediation.get("remediation_notes", [])
+    if not notes and not remediation.get("feasible"):
+        return ""
+    items = "".join(f"<li>{note}</li>" for note in notes)
+    return (
+        "<div class='remediation-box'>"
+        "<div class='remediation-title'>💡 Alternative Pathways to Approval (Adverse-Action Remediation)</div>"
+        "<div class='remediation-subtitle'>Mathematical adjustments calculated by deterministic policy engine to rescue eligibility:</div>"
+        f"<ul class='remediation-list'>{items}</ul>"
+        "</div>"
+    )
+
+
 # ── Full-Context Streaming Sender ─────────────────────────────────────────────
 def _send_message(user_msg: str):
     """Stream from /chat SSE, accumulate events, preserve tokens on mid-stream error."""
@@ -601,6 +664,7 @@ def _send_message(user_msg: str):
     citations   = []
     app_id      = None
     rule_checks = []
+    remediation = None
     error_msg   = None
 
     try:
@@ -654,6 +718,9 @@ def _send_message(user_msg: str):
                 elif etype == "citations":
                     citations = event.get("sources", [])
 
+                elif etype == "remediation":
+                    remediation = event.get("data", {})
+
                 elif etype == "audit_ref":
                     app_id = event.get("application_id")
 
@@ -695,6 +762,11 @@ def _send_message(user_msg: str):
     if calcs:
         final_parts.append(_metric_strip_html(calcs, annual_rate))
 
+    # Adverse Action Remediation Card
+    rem = remediation or (decision.get("remediation") if decision else None)
+    if rem:
+        final_parts.append(_remediation_card_html(rem))
+
     final_parts.append("</div></div>")
     msg_placeholder.markdown("".join(final_parts), unsafe_allow_html=True)
 
@@ -702,6 +774,8 @@ def _send_message(user_msg: str):
     meta = {}
     if decision:
         meta["decision"] = decision
+    if rem:
+        meta["remediation"] = rem
     if calcs:
         meta["calcs"] = calcs
         if annual_rate is not None:
@@ -774,6 +848,10 @@ def _render_message(msg: dict):
 
         if calcs:
             parts.append(_metric_strip_html(calcs, annual_rate))
+
+        rem = meta.get("remediation") or (decision.get("remediation") if decision else None)
+        if rem:
+            parts.append(_remediation_card_html(rem))
 
         parts.append("</div></div>")
         st.markdown("".join(parts), unsafe_allow_html=True)
@@ -916,6 +994,17 @@ with st.sidebar:
 # ── Main Chat Area: Empty State vs Message Feed ────────────────────────────────
 st.markdown("<div class='chat-container'>", unsafe_allow_html=True)
 
+# ── DPDP Act 2023 Consent Disclosure ──────────────────────────────────────────
+st.markdown(
+    """
+    <div class="dpdp-banner">
+        🛡️ <strong>DPDP Act (2023) Privacy Notice:</strong>
+        Financial information provided during this session is processed solely for deterministic loan pre-qualification. No PII is permanently stored or shared without your explicit consent.
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
 # Hero greeting if no messages yet
 if not st.session_state.messages:
     st.markdown(
@@ -936,12 +1025,12 @@ if not st.session_state.messages:
     starters = [
         ("🏠", "Home Loan Pre-Check", "Check eligibility for ₹50L loan with ₹1.2L net income",
          "I want to check my eligibility for a home loan of ₹50,00,000. My monthly net income is ₹1,20,000, age 34, salaried, 5 years employment, credit score 760, existing EMI ₹10,000, property value ₹70,00,000, down payment ₹20,00,000, apartment, 240 months tenure."),
+        ("👥", "Joint Home Loan (Co-Applicant)", "Pool household incomes to increase borrowing capacity",
+         "I want to apply for a joint home loan of ₹60,00,000 for 240 months. My salary is ₹35,000/mo and my spouse's income is ₹45,000/mo. Age 33, salaried, credit score 740, no existing loans, property value ₹80,00,000, down payment ₹20,00,000, apartment."),
         ("💳", "Personal Loan Quick Assessment", "Check eligibility for ₹5L personal loan for 36 months",
          "I want a personal loan of ₹5,00,000. Age 32, salaried, monthly income ₹75,000, 3 years at company, credit score 760, no existing EMIs, tenure 36 months."),
         ("🚗", "Auto Loan Check", "Pre-qualify for a new car loan with ₹80K income",
          "I need an auto loan for a new four-wheeler. On-road price is ₹12,00,000, loan amount ₹9,00,000, monthly salary ₹80,000, age 29, credit score 730, tenure 60 months, no existing EMIs."),
-        ("📋", "Required Documents Checklist", "See mandatory paperwork required for home loans",
-         "What documents do I need to prepare for a home loan application?"),
     ]
 
     col1, col2 = st.columns(2)
