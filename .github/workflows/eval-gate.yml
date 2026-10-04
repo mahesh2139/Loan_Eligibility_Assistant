@@ -47,12 +47,16 @@ jobs:
     env:
       API_KEY:   local-dev-key
       LLM_MODEL: qwen-local
+      PROMPT_VERSION: v1
       ACTIVE_PERSONAL_LOAN_VERSION: v2
       ACTIVE_HOME_LOAN_VERSION: v1
       ACTIVE_AUTO_LOAN_VERSION: v1
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Create .env file for Docker Compose
+        run: cp .env.example .env
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
@@ -62,7 +66,7 @@ jobs:
       - name: Install Node.js (for promptfoo)
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -71,9 +75,16 @@ jobs:
         run: |
           pip install -r api/requirements.txt pyyaml
           python rag/ingest.py
+          mkdir -p logs rag/chroma
+          chmod -R 777 logs rag/chroma
 
       - name: Build and start the stack
-        run: docker compose up -d --wait --timeout 120
+        run: |
+          docker compose up -d --build --wait --timeout 120 || {
+            echo "::error::Docker compose up failed. Dumping service logs:"
+            docker compose logs
+            exit 1
+          }
         timeout-minutes: 5
 
       - name: Wait for API health
@@ -104,6 +115,10 @@ jobs:
           path: |
             promptfoo-output.json
             promptfoo-output.html
+
+      - name: Dump container logs on failure
+        if: failure()
+        run: docker compose logs
 
       - name: Stop stack
         if: always()

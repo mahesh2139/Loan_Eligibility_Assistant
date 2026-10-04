@@ -133,9 +133,14 @@ app.add_middleware(
 # ── ChromaDB & Hybrid Retriever ──────────────────────────────────────────────
 _chroma = chromadb.PersistentClient(path=CHROMA_DIR)
 
-rag_path = str(Path(__file__).resolve().parent.parent / "rag")
-if rag_path not in sys.path:
-    sys.path.insert(0, rag_path)
+for _p in [
+    str(Path(__file__).resolve().parent.parent / "rag"),
+    str(Path(__file__).resolve().parent / "rag"),
+    "/app/rag",
+    "/app/data",
+]:
+    if os.path.isdir(_p) and _p not in sys.path:
+        sys.path.insert(0, _p)
 try:
     from hybrid_retriever import HybridRetriever
     _hybrid_retriever = HybridRetriever(_chroma, default_top_k=TOP_K)
