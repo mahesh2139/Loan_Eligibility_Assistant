@@ -3763,5 +3763,649 @@
     "last_citations": [],
     "last_app_id": null,
     "product": null
+  },
+  "conv-35e6677e": {
+    "session_id": "conv-35e6677e",
+    "title": "I want to apply for a joint home…",
+    "created_at": 1791127895.092767,
+    "updated_at": 1791127997.4430902,
+    "messages": [
+      {
+        "role": "user",
+        "content": "I want to apply for a joint home loan of ₹60,00,000 for 240 months. My salary is ₹35,000/mo and my spouse's income is ₹45,000/mo. Age 33, salaried, credit score 740, no existing loans, property value ₹80,00,000, down payment ₹20,00,000, apartment."
+      },
+      {
+        "role": "assistant",
+        "content": "Thank you for sharing those details! To complete your application, could you please let me know how long you and your spouse have been employed?",
+        "meta": {}
+      },
+      {
+        "role": "user",
+        "content": "5 years and 3 years respectively "
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for a home loan has resulted in a decision of NOT_ELIGIBLE. This means that, based on the current criteria, you do not meet the requirements necessary to qualify for the loan at this time.\n\nSeveral rules were evaluated in your application. You passed the following criteria: your age (33 years) is eligible as it falls within the required age limit (Rule ID: HL-AGE-001), your monthly income of ₹35,000 (household income of ₹80,000) meets the minimum requirement (Rule ID: HL-INC-001), your employment stability is sufficient with 60 months of salaried employment (Rule ID: HL-EMP-001), and your credit score of 740 exceeds the minimum threshold (Rule ID: HL-CRD-001). However, you failed two critical rules: your FOIR (Fixed Obligation to Income Ratio) is 65.1%, which exceeds the maximum allowable limit of 55% (Rule ID: HL-FOIR-001), and the loan amount you requested, ₹6,000,000, exceeds the maximum affordable amount of ₹5,070,157 based on your income and FOIR (Rule ID: HL-AMT-001).\n\nTo improve your eligibility, you could consider reducing the loan amount you are requesting to align with the maximum affordable limit. Additionally, lowering your existing financial obligations could help decrease your FOIR, making you more eligible for the loan. \n\nPlease note that this assessment does not guarantee final loan approval, and any changes made will need to be re-evaluated against the eligibility criteria.",
+        "meta": {
+          "decision": {
+            "decision": "NOT_ELIGIBLE",
+            "product": "home_loan",
+            "rule_checks": [
+              {
+                "rule_id": "HL-AGE-001",
+                "rule_name": "Age Eligibility",
+                "result": "PASS",
+                "detail": "Age 33 is eligible and loan closes within age limit of 70.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹35,000 (household ₹80,000 with co-applicant) meets minimum ₹40,000.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "PASS",
+                "detail": "Salaried employment 60 months meets 24-month requirement.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 740 meets minimum 700.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 65.1% > maximum 55%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "PASS",
+                "detail": "LTV 75.0% ≤ maximum 80%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-PROP-001",
+                "rule_name": "Property Eligibility",
+                "result": "PASS",
+                "detail": "Property type 'apartment' is eligible for a home loan.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "FAIL",
+                "detail": "Amount ₹6,000,000 exceeds maximum affordable ₹5,070,157 based on income and FOIR.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 240 months is within 12–360 months.",
+                "rule_version": "v1"
+              }
+            ],
+            "failed_rules": [
+              {
+                "rule_id": "HL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 65.1% > maximum 55%."
+              },
+              {
+                "rule_id": "HL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "FAIL",
+                "detail": "Amount ₹6,000,000 exceeds maximum affordable ₹5,070,157 based on income and FOIR."
+              }
+            ],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "remediation_notes": [
+              "Reduce requested loan from ₹6,000,000 to ₹5,070,157 to bring your monthly obligations within the 55% FOIR limit.",
+              "Add a co-borrower (e.g. spouse/parent) earning at least ₹14,672/month to combine household income and qualify for ₹6,000,000."
+            ],
+            "remediation": {
+              "feasible": true,
+              "max_affordable_loan": 5070156.95,
+              "suggested_loan_amount": 5070000.0,
+              "suggested_tenure_months": null,
+              "suggested_down_payment": null,
+              "suggested_co_applicant_income": 15000.0,
+              "remediation_notes": [
+                "Reduce requested loan from ₹6,000,000 to ₹5,070,157 to bring your monthly obligations within the 55% FOIR limit.",
+                "Add a co-borrower (e.g. spouse/parent) earning at least ₹14,672/month to combine household income and qualify for ₹6,000,000."
+              ]
+            },
+            "policy_version": "v1"
+          },
+          "remediation": {
+            "feasible": true,
+            "max_affordable_loan": 5070156.95,
+            "suggested_loan_amount": 5070000.0,
+            "suggested_tenure_months": null,
+            "suggested_down_payment": null,
+            "suggested_co_applicant_income": 15000.0,
+            "remediation_notes": [
+              "Reduce requested loan from ₹6,000,000 to ₹5,070,157 to bring your monthly obligations within the 55% FOIR limit.",
+              "Add a co-borrower (e.g. spouse/parent) earning at least ₹14,672/month to combine household income and qualify for ₹6,000,000."
+            ]
+          },
+          "calcs": {
+            "emi": 52069.39,
+            "foir": 0.6509,
+            "ltv": 0.75,
+            "max_affordable_loan": 5070156.95,
+            "total_interest": 6496653.6,
+            "total_payment": 12496653.6,
+            "total_household_income": 80000.0,
+            "total_household_emi": 0.0
+          },
+          "annual_rate": 8.5,
+          "citations": [
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-DOC-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 10. Documentation Requirements **Rule ID:** HL-DOC-001 The following documents are required for a home loan application: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Income proof: - Salaried: last 3 months "
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-TEN-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 9. Loan Tenure **Rule ID:** HL-TEN-001 Home loan tenure must be between 12 months (1 year) and 360 months (30 years), subject to the age-based maximum tenure described in Section 1. Longer tenures reduce the monthly EMI burden but increase total interest paid."
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-AMT-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 8. Loan Amount **Rule ID:** HL-AMT-001 The minimum home loan amount is ₹5,00,000 (five lakh rupees). The maximum home loan amount is ₹5,00,00,000 (five crore rupees). The loan amount is further capped by: - The applicable LTV ratio applied to the property's assessed value - The maximum affordable"
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-LTV-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** HL-LTV-001 The Loan-to-Value ratio determines the maximum loan as a percentage of the property's assessed market value: - For loan amounts up to ₹30,00,000 (thirty lakh rupees): maximum LTV of 85% - For loan amounts above ₹30,00,000 (thirty lakh rupees): "
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-AGE-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 1. Age Eligibility **Rule ID:** HL-AGE-001 Applicants must be at least 21 years old at the time of loan application. The loan must close (final instalment paid) before the applicant reaches 70 years of age. Accordingly, the maximum permissible tenure is determined as: (70 − applicant age) × 12 mo"
+            }
+          ],
+          "app_id": "APP-1A4549A5C2EA",
+          "rule_checks": [
+            {
+              "rule_id": "HL-AGE-001",
+              "rule_name": "Age Eligibility",
+              "result": "PASS",
+              "detail": "Age 33 is eligible and loan closes within age limit of 70.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹35,000 (household ₹80,000 with co-applicant) meets minimum ₹40,000.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-EMP-001",
+              "rule_name": "Employment Stability",
+              "result": "PASS",
+              "detail": "Salaried employment 60 months meets 24-month requirement.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 740 meets minimum 700.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "FAIL",
+              "detail": "FOIR 65.1% > maximum 55%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-LTV-001",
+              "rule_name": "Loan-to-Value (LTV)",
+              "result": "PASS",
+              "detail": "LTV 75.0% ≤ maximum 80%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-PROP-001",
+              "rule_name": "Property Eligibility",
+              "result": "PASS",
+              "detail": "Property type 'apartment' is eligible for a home loan.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "FAIL",
+              "detail": "Amount ₹6,000,000 exceeds maximum affordable ₹5,070,157 based on income and FOIR.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 240 months is within 12–360 months.",
+              "rule_version": "v1"
+            }
+          ]
+        }
+      },
+      {
+        "role": "user",
+        "content": "can you provide you Mobile No. ?"
+      },
+      {
+        "role": "assistant",
+        "content": "Your eligibility assessment for a home loan has resulted in a decision of NOT_ELIGIBLE. This means that, based on the current evaluation, you do not meet the necessary criteria to qualify for the loan at this time.\n\nSeveral rules were evaluated during the assessment. You successfully met the following criteria: your age (33) is within the eligible range, your monthly income of ₹35,000 (household income of ₹80,000) meets the minimum requirement, you have stable employment for 60 months, and your credit score of 740 exceeds the minimum threshold of 700. However, you did not meet the following critical criteria: your FOIR (Fixed Obligation to Income Ratio) is 65.1%, which exceeds the maximum allowable limit of 55% (Rule ID: HL-FOIR-001), and the loan amount you requested, ₹6,000,000, exceeds the maximum affordable amount of ₹5,070,157 based on your income and FOIR (Rule ID: HL-AMT-001).\n\nTo improve your eligibility, you could consider reducing your loan amount to align with the maximum affordable limit of ₹5,070,157. Additionally, lowering your FOIR by either increasing your income or reducing existing financial obligations could also help you meet the required criteria.\n\nPlease note that this assessment does not guarantee final loan approval, as further evaluations, including property valuation and legal verification, will be necessary. If you have any questions or need assistance with the next steps, feel free to reach out.",
+        "meta": {
+          "decision": {
+            "decision": "NOT_ELIGIBLE",
+            "product": "home_loan",
+            "rule_checks": [
+              {
+                "rule_id": "HL-AGE-001",
+                "rule_name": "Age Eligibility",
+                "result": "PASS",
+                "detail": "Age 33 is eligible and loan closes within age limit of 70.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-INC-001",
+                "rule_name": "Minimum Income",
+                "result": "PASS",
+                "detail": "Monthly income ₹35,000 (household ₹80,000 with co-applicant) meets minimum ₹40,000.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-EMP-001",
+                "rule_name": "Employment Stability",
+                "result": "PASS",
+                "detail": "Salaried employment 60 months meets 24-month requirement.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-CRD-001",
+                "rule_name": "Credit Score",
+                "result": "PASS",
+                "detail": "Credit score 740 meets minimum 700.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 65.1% > maximum 55%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-LTV-001",
+                "rule_name": "Loan-to-Value (LTV)",
+                "result": "PASS",
+                "detail": "LTV 75.0% ≤ maximum 80%.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-PROP-001",
+                "rule_name": "Property Eligibility",
+                "result": "PASS",
+                "detail": "Property type 'apartment' is eligible for a home loan.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "FAIL",
+                "detail": "Amount ₹6,000,000 exceeds maximum affordable ₹5,070,157 based on income and FOIR.",
+                "rule_version": "v1"
+              },
+              {
+                "rule_id": "HL-TEN-001",
+                "rule_name": "Loan Tenure",
+                "result": "PASS",
+                "detail": "Tenure 240 months is within 12–360 months.",
+                "rule_version": "v1"
+              }
+            ],
+            "failed_rules": [
+              {
+                "rule_id": "HL-FOIR-001",
+                "rule_name": "FOIR",
+                "result": "FAIL",
+                "detail": "FOIR 65.1% > maximum 55%."
+              },
+              {
+                "rule_id": "HL-AMT-001",
+                "rule_name": "Loan Amount",
+                "result": "FAIL",
+                "detail": "Amount ₹6,000,000 exceeds maximum affordable ₹5,070,157 based on income and FOIR."
+              }
+            ],
+            "manual_review_rules": [],
+            "missing_fields": [],
+            "remediation_notes": [
+              "Reduce requested loan from ₹6,000,000 to ₹5,070,157 to bring your monthly obligations within the 55% FOIR limit.",
+              "Add a co-borrower (e.g. spouse/parent) earning at least ₹14,672/month to combine household income and qualify for ₹6,000,000."
+            ],
+            "remediation": {
+              "feasible": true,
+              "max_affordable_loan": 5070156.95,
+              "suggested_loan_amount": 5070000.0,
+              "suggested_tenure_months": null,
+              "suggested_down_payment": null,
+              "suggested_co_applicant_income": 15000.0,
+              "remediation_notes": [
+                "Reduce requested loan from ₹6,000,000 to ₹5,070,157 to bring your monthly obligations within the 55% FOIR limit.",
+                "Add a co-borrower (e.g. spouse/parent) earning at least ₹14,672/month to combine household income and qualify for ₹6,000,000."
+              ]
+            },
+            "policy_version": "v1"
+          },
+          "remediation": {
+            "feasible": true,
+            "max_affordable_loan": 5070156.95,
+            "suggested_loan_amount": 5070000.0,
+            "suggested_tenure_months": null,
+            "suggested_down_payment": null,
+            "suggested_co_applicant_income": 15000.0,
+            "remediation_notes": [
+              "Reduce requested loan from ₹6,000,000 to ₹5,070,157 to bring your monthly obligations within the 55% FOIR limit.",
+              "Add a co-borrower (e.g. spouse/parent) earning at least ₹14,672/month to combine household income and qualify for ₹6,000,000."
+            ]
+          },
+          "calcs": {
+            "emi": 52069.39,
+            "foir": 0.6509,
+            "ltv": 0.75,
+            "max_affordable_loan": 5070156.95,
+            "total_interest": 6496653.6,
+            "total_payment": 12496653.6,
+            "total_household_income": 80000.0,
+            "total_household_emi": 0.0
+          },
+          "annual_rate": 8.5,
+          "citations": [
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-DOC-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 10. Documentation Requirements **Rule ID:** HL-DOC-001 The following documents are required for a home loan application: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Income proof: - Salaried: last 3 months "
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-AMT-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 8. Loan Amount **Rule ID:** HL-AMT-001 The minimum home loan amount is ₹5,00,000 (five lakh rupees). The maximum home loan amount is ₹5,00,00,000 (five crore rupees). The loan amount is further capped by: - The applicable LTV ratio applied to the property's assessed value - The maximum affordable"
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-LTV-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** HL-LTV-001 The Loan-to-Value ratio determines the maximum loan as a percentage of the property's assessed market value: - For loan amounts up to ₹30,00,000 (thirty lakh rupees): maximum LTV of 85% - For loan amounts above ₹30,00,000 (thirty lakh rupees): "
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-PROP-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 7. Property Eligibility **Rule ID:** HL-PROP-001 Financing is available only for the following property types: - Apartment (flat in a residential complex) - Villa (standalone residential property with defined plot) - Residential house (independent house on a defined plot) The following property t"
+            },
+            {
+              "doc": "home_loan_v1.md",
+              "rule_id": "HL-EXC-001",
+              "version": "v1",
+              "policy_id": "LPQ-HL-2026-01",
+              "text": "## 11. Exceptions and Special Cases **Rule ID:** HL-EXC-001 The following cases require manual underwriting review: - Self-employed applicants with 24–35 months of business operation - Co-applicant arrangements where one co-applicant has a credit score between 680 and 699 - Properties with partial c"
+            }
+          ],
+          "app_id": "APP-9FD2516F3B43",
+          "rule_checks": [
+            {
+              "rule_id": "HL-AGE-001",
+              "rule_name": "Age Eligibility",
+              "result": "PASS",
+              "detail": "Age 33 is eligible and loan closes within age limit of 70.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-INC-001",
+              "rule_name": "Minimum Income",
+              "result": "PASS",
+              "detail": "Monthly income ₹35,000 (household ₹80,000 with co-applicant) meets minimum ₹40,000.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-EMP-001",
+              "rule_name": "Employment Stability",
+              "result": "PASS",
+              "detail": "Salaried employment 60 months meets 24-month requirement.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-CRD-001",
+              "rule_name": "Credit Score",
+              "result": "PASS",
+              "detail": "Credit score 740 meets minimum 700.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-FOIR-001",
+              "rule_name": "FOIR",
+              "result": "FAIL",
+              "detail": "FOIR 65.1% > maximum 55%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-LTV-001",
+              "rule_name": "Loan-to-Value (LTV)",
+              "result": "PASS",
+              "detail": "LTV 75.0% ≤ maximum 80%.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-PROP-001",
+              "rule_name": "Property Eligibility",
+              "result": "PASS",
+              "detail": "Property type 'apartment' is eligible for a home loan.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-AMT-001",
+              "rule_name": "Loan Amount",
+              "result": "FAIL",
+              "detail": "Amount ₹6,000,000 exceeds maximum affordable ₹5,070,157 based on income and FOIR.",
+              "rule_version": "v1"
+            },
+            {
+              "rule_id": "HL-TEN-001",
+              "rule_name": "Loan Tenure",
+              "result": "PASS",
+              "detail": "Tenure 240 months is within 12–360 months.",
+              "rule_version": "v1"
+            }
+          ]
+        }
+      }
+    ],
+    "last_decision": {
+      "decision": "NOT_ELIGIBLE",
+      "product": "home_loan",
+      "rule_checks": [
+        {
+          "rule_id": "HL-AGE-001",
+          "rule_name": "Age Eligibility",
+          "result": "PASS",
+          "detail": "Age 33 is eligible and loan closes within age limit of 70.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-INC-001",
+          "rule_name": "Minimum Income",
+          "result": "PASS",
+          "detail": "Monthly income ₹35,000 (household ₹80,000 with co-applicant) meets minimum ₹40,000.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-EMP-001",
+          "rule_name": "Employment Stability",
+          "result": "PASS",
+          "detail": "Salaried employment 60 months meets 24-month requirement.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-CRD-001",
+          "rule_name": "Credit Score",
+          "result": "PASS",
+          "detail": "Credit score 740 meets minimum 700.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "FAIL",
+          "detail": "FOIR 65.1% > maximum 55%.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-LTV-001",
+          "rule_name": "Loan-to-Value (LTV)",
+          "result": "PASS",
+          "detail": "LTV 75.0% ≤ maximum 80%.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-PROP-001",
+          "rule_name": "Property Eligibility",
+          "result": "PASS",
+          "detail": "Property type 'apartment' is eligible for a home loan.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-AMT-001",
+          "rule_name": "Loan Amount",
+          "result": "FAIL",
+          "detail": "Amount ₹6,000,000 exceeds maximum affordable ₹5,070,157 based on income and FOIR.",
+          "rule_version": "v1"
+        },
+        {
+          "rule_id": "HL-TEN-001",
+          "rule_name": "Loan Tenure",
+          "result": "PASS",
+          "detail": "Tenure 240 months is within 12–360 months.",
+          "rule_version": "v1"
+        }
+      ],
+      "failed_rules": [
+        {
+          "rule_id": "HL-FOIR-001",
+          "rule_name": "FOIR",
+          "result": "FAIL",
+          "detail": "FOIR 65.1% > maximum 55%."
+        },
+        {
+          "rule_id": "HL-AMT-001",
+          "rule_name": "Loan Amount",
+          "result": "FAIL",
+          "detail": "Amount ₹6,000,000 exceeds maximum affordable ₹5,070,157 based on income and FOIR."
+        }
+      ],
+      "manual_review_rules": [],
+      "missing_fields": [],
+      "remediation_notes": [
+        "Reduce requested loan from ₹6,000,000 to ₹5,070,157 to bring your monthly obligations within the 55% FOIR limit.",
+        "Add a co-borrower (e.g. spouse/parent) earning at least ₹14,672/month to combine household income and qualify for ₹6,000,000."
+      ],
+      "remediation": {
+        "feasible": true,
+        "max_affordable_loan": 5070156.95,
+        "suggested_loan_amount": 5070000.0,
+        "suggested_tenure_months": null,
+        "suggested_down_payment": null,
+        "suggested_co_applicant_income": 15000.0,
+        "remediation_notes": [
+          "Reduce requested loan from ₹6,000,000 to ₹5,070,157 to bring your monthly obligations within the 55% FOIR limit.",
+          "Add a co-borrower (e.g. spouse/parent) earning at least ₹14,672/month to combine household income and qualify for ₹6,000,000."
+        ]
+      },
+      "policy_version": "v1"
+    },
+    "last_calcs": {
+      "emi": 52069.39,
+      "foir": 0.6509,
+      "ltv": 0.75,
+      "max_affordable_loan": 5070156.95,
+      "total_interest": 6496653.6,
+      "total_payment": 12496653.6,
+      "total_household_income": 80000.0,
+      "total_household_emi": 0.0
+    },
+    "last_citations": [
+      {
+        "doc": "home_loan_v1.md",
+        "rule_id": "HL-DOC-001",
+        "version": "v1",
+        "policy_id": "LPQ-HL-2026-01",
+        "text": "## 10. Documentation Requirements **Rule ID:** HL-DOC-001 The following documents are required for a home loan application: - Identity proof: Aadhaar card and PAN card (mandatory) - Address proof: utility bill, bank statement, or registered rental agreement - Income proof: - Salaried: last 3 months "
+      },
+      {
+        "doc": "home_loan_v1.md",
+        "rule_id": "HL-AMT-001",
+        "version": "v1",
+        "policy_id": "LPQ-HL-2026-01",
+        "text": "## 8. Loan Amount **Rule ID:** HL-AMT-001 The minimum home loan amount is ₹5,00,000 (five lakh rupees). The maximum home loan amount is ₹5,00,00,000 (five crore rupees). The loan amount is further capped by: - The applicable LTV ratio applied to the property's assessed value - The maximum affordable"
+      },
+      {
+        "doc": "home_loan_v1.md",
+        "rule_id": "HL-LTV-001",
+        "version": "v1",
+        "policy_id": "LPQ-HL-2026-01",
+        "text": "## 6. Loan-to-Value Ratio (LTV) **Rule ID:** HL-LTV-001 The Loan-to-Value ratio determines the maximum loan as a percentage of the property's assessed market value: - For loan amounts up to ₹30,00,000 (thirty lakh rupees): maximum LTV of 85% - For loan amounts above ₹30,00,000 (thirty lakh rupees): "
+      },
+      {
+        "doc": "home_loan_v1.md",
+        "rule_id": "HL-PROP-001",
+        "version": "v1",
+        "policy_id": "LPQ-HL-2026-01",
+        "text": "## 7. Property Eligibility **Rule ID:** HL-PROP-001 Financing is available only for the following property types: - Apartment (flat in a residential complex) - Villa (standalone residential property with defined plot) - Residential house (independent house on a defined plot) The following property t"
+      },
+      {
+        "doc": "home_loan_v1.md",
+        "rule_id": "HL-EXC-001",
+        "version": "v1",
+        "policy_id": "LPQ-HL-2026-01",
+        "text": "## 11. Exceptions and Special Cases **Rule ID:** HL-EXC-001 The following cases require manual underwriting review: - Self-employed applicants with 24–35 months of business operation - Co-applicant arrangements where one co-applicant has a credit score between 680 and 699 - Properties with partial c"
+      }
+    ],
+    "last_app_id": "APP-9FD2516F3B43",
+    "product": "home_loan"
   }
 }

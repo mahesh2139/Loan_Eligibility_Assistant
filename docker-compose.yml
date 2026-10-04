@@ -68,6 +68,11 @@ services:
       - ./api/app.py:/app/app.py:ro
       - ./api/profile_extractor.py:/app/profile_extractor.py:ro
       - ./api/rules_engine.py:/app/rules_engine.py:ro
+      - ./api/calculators.py:/app/calculators.py:ro
+      - ./api/guardrails.py:/app/guardrails.py:ro
+      - ./api/redact.py:/app/redact.py:ro
+      - ./api/session_store.py:/app/session_store.py:ro
+      - ./api/semantic_cache.py:/app/semantic_cache.py:ro
       - ./logs:/app/logs
     env_file:
       - .env

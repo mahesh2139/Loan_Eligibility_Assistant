@@ -21,7 +21,7 @@ RUN mkdir -p /app/logs \
     && chown -R appuser /app/logs
 
 # API modules
-COPY app.py guardrails.py redact.py calculators.py rules_engine.py profile_extractor.py ./
+COPY *.py ./
 
 # Prompt registry (needed by loader.py at startup)
 COPY prompts ./prompts/
